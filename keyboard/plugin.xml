@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:rim="http://www.blackberry.com/ns/widgets"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    id="org.apache.cordova.keyboard"
+    version="0.1.0">
+    <name>Device</name>
+    <description>Cordova Keyboard Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,keyboard</keywords>
+
+    <js-module src="www/keyboard.js" name="keyboard">
+    	<clobbers target="window.Keyboard" />
+    </js-module>
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="Keyboard">
+                <param name="ios-package" value="CDVKeyboard"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/CDVKeyboard.h" />
+        <source-file src="src/ios/CDVKeyboard.m" />
+    </platform>
+
+</plugin>
