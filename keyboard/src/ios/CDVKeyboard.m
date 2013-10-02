@@ -18,6 +18,11 @@
  */
 
 #import "CDVKeyboard.h"
+#import <Cordova/CDVAvailability.h>
+
+#ifndef __CORDOVA_3_2_0
+#error "This plugin is only supported in Cordova 3.2 or greater."
+#endif
 
 @interface CDVKeyboard ()
 
