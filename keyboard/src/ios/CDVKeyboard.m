@@ -65,14 +65,14 @@
                                             object:nil
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
-            // TODO: set Keyboard.isVisible in JavaScript
+            [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = true;"];
             weakSelf.keyboardIsVisible = YES;
         }];
     _keyboardHideObserver = [nc addObserverForName:UIKeyboardDidHideNotification
                                             object:nil
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
-            // TODO: set Keyboard.isVisible in JavaScript
+            [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = false;"];
             weakSelf.keyboardIsVisible = NO;
         }];
 }
@@ -285,5 +285,40 @@ CGFloat gAccessoryBarHeight = 0.0;
     [nc removeObserver:self name:UIKeyboardWillShowNotification object:nil];
     [nc removeObserver:self name:UIKeyboardWillHideNotification object:nil];
 }
+
+// //////////////////////////////////////////////////
+
+#pragma Plugin interface
+
+- (void) shrinkView:(CDVInvokedUrlCommand*)command
+{
+    id value = [command.arguments objectAtIndex:0];
+    if (!([value isKindOfClass:[NSNumber class]])) {
+        value = [NSNumber numberWithBool:NO];
+    }
+    
+    self.shrinkView = [value boolValue];
+}
+
+- (void) disableScrollingInShrinkView:(CDVInvokedUrlCommand*)command
+{
+    id value = [command.arguments objectAtIndex:0];
+    if (!([value isKindOfClass:[NSNumber class]])) {
+        value = [NSNumber numberWithBool:NO];
+    }
+    
+    self.disableScrollingInShrinkView = [value boolValue];
+}
+
+- (void) hideFormAccessoryBar:(CDVInvokedUrlCommand*)command
+{
+    id value = [command.arguments objectAtIndex:0];
+    if (!([value isKindOfClass:[NSNumber class]])) {
+        value = [NSNumber numberWithBool:NO];
+    }
+    
+    self.hideFormAccessoryBar = [value boolValue];
+}
+
 
 @end

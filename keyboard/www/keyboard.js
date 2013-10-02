@@ -26,15 +26,15 @@ var argscheck = require('cordova/argscheck'),
 var Keyboard = function() {
 };
 
-Keyboard.prototype.keyboardShrinksView = function(shrink) {
-    exec(null, null, "Keyboard", "keyboardShrinksView", [shrink]);
+Keyboard.shrinkView = function(shrink) {
+    exec(null, null, "Keyboard", "shrinkView", [shrink]);
 };
 
-Keyboard.prototype.hideFormAccessoryBar = function(hide) {
+Keyboard.hideFormAccessoryBar = function(hide) {
     exec(null, null, "Keyboard", "hideFormAccessoryBar", [hide]);
 };
 
-Keyboard.prototype.disableScrollingInShrinkView = function(disable) {
+Keyboard.disableScrollingInShrinkView = function(disable) {
     exec(null, null, "Keyboard", "disableScrollingInShrinkView", [disable]);
 };
 

@@ -37,4 +37,10 @@
 @property (readonly, assign)  BOOL hideFormAccessoryBar;
 @property (readonly, assign)  BOOL keyboardIsVisible;
 
+
+- (void) shrinkView:(CDVInvokedUrlCommand*)command;
+- (void) disableScrollingInShrinkView:(CDVInvokedUrlCommand*)command;
+- (void) hideFormAccessoryBar:(CDVInvokedUrlCommand*)command;
+
+
 @end
