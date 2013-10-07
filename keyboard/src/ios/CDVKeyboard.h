@@ -30,6 +30,8 @@
     id _hideFormAccessoryBarKeyboardShowObserver, _hideFormAccessoryBarKeyboardHideObserver;
     @protected
     id _shrinkViewKeyboardShowObserver, _shrinkViewKeyboardHideObserver;
+    @protected
+    CGFloat _accessoryBarHeight;
 }
 
 @property (readwrite, assign) BOOL shrinkView;

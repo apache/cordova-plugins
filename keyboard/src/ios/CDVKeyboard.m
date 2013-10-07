@@ -187,7 +187,6 @@
 
 // //////////////////////////////////////////////////
 
-CGFloat gAccessoryBarHeight = 0.0;
 - (void)formAccessoryBarKeyboardWillShow:(NSNotification*)notif
 {
     if (!_hideFormAccessoryBar) {
@@ -212,7 +211,7 @@ CGFloat gAccessoryBarHeight = 0.0;
                         newFrame.size.height += peripheralView.frame.size.height;
                         self.webView.scrollView.frame = newFrame;
 
-                        gAccessoryBarHeight = peripheralView.frame.size.height;
+                        _accessoryBarHeight = peripheralView.frame.size.height;
 
                         // remove the form accessory bar
                         [peripheralView removeFromSuperview];
@@ -248,8 +247,7 @@ CGFloat gAccessoryBarHeight = 0.0;
     keyboardFrame = [self.viewController.view convertRect:keyboardFrame fromView:nil];
 
     CGRect newFrame = self.viewController.view.bounds;
-    CGFloat accessoryHeight = gAccessoryBarHeight;
-    CGFloat actualKeyboardHeight = (keyboardFrame.size.height - accessoryHeight);
+    CGFloat actualKeyboardHeight = (keyboardFrame.size.height - _accessoryBarHeight);
     newFrame.size.height -= actualKeyboardHeight;
 
     self.webView.frame = newFrame;
