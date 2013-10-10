@@ -21,7 +21,7 @@
 #import <Cordova/CDVAvailability.h>
 
 #ifndef __CORDOVA_3_2_0
-#error "This plugin is only supported in Cordova 3.2 or greater."
+#warning "The keyboard plugin is only supported in Cordova 3.2 or greater, it may not work properly in an older version. If you do use this plugin in an older version, make sure the HideKeyboardFormAccessoryBar and KeyboardShrinksView preference values are false."
 #endif
 
 @interface CDVKeyboard ()

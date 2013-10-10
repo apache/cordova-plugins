@@ -3,9 +3,11 @@ Keyboard
 
 > The `Keyboard` object provides some functions to customize the iOS keyboard.
 
-This plugin only runs in Cordova 3.2 or greater. This plugin contains the keyboard customization code present in the core in previous Cordova versions, and thus can't be used in those versions. 
+This plugin has only been tested in Cordova 3.2 or greater, and its use in previous Cordova versions is not recommended (potential conflict with keyboard customization code present in the core in previous Cordova versions). 
 
-This plugin supports the old __HideKeyboardFormAccessoryBar__ and __KeyboardShrinksView__ boolean preferences in config.xml as well.
+If you do use this plugin in an older Cordova version (again, not recommended), you have to make sure the HideKeyboardFormAccessoryBar and KeyboardShrinksView preference values are *always* false, and only use the API functions to turn things on/off.
+
+This plugin supports the __HideKeyboardFormAccessoryBar__ (boolean) and __KeyboardShrinksView__ (boolean) preferences in config.xml.
 
 Methods
 -------
