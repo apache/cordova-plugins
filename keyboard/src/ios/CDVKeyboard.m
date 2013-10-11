@@ -27,7 +27,6 @@
 @interface CDVKeyboard ()
 
 @property (nonatomic, readwrite, assign) BOOL keyboardIsVisible;
-@property (nonatomic, readwrite, assign) BOOL hideFormAccessoryBar;
 
 @end
 
@@ -228,9 +227,6 @@
 
 - (void)formAccessoryBarKeyboardWillHide:(NSNotification*)notif
 {
-    // TODO: incomplete - we can't restore the accessory bar currently, this is why the public interface for the setting is readonly.
-    // Not entirely sure we can restore this properly in the same hierarchy, even if we save the references
-
     // restore the scrollview frame
     self.webView.scrollView.frame = self.webView.frame;
 }

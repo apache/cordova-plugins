@@ -36,7 +36,7 @@
 
 @property (readwrite, assign) BOOL shrinkView;
 @property (readwrite, assign) BOOL disableScrollingInShrinkView;
-@property (readonly, assign)  BOOL hideFormAccessoryBar;
+@property (readwrite, assign)  BOOL hideFormAccessoryBar;
 @property (readonly, assign)  BOOL keyboardIsVisible;
 
 
