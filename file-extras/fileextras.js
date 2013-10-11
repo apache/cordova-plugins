@@ -31,7 +31,7 @@ var DirectoryEntry = require('org.apache.cordova.file.DirectoryEntry');
 //   * e.g. On Android, could use same schemes for 3.0+, or use content://cordova-app/app-data://... for 2.3
 //   * This would mean APIs could be synchronous, and platform-specific locations can be kept on native side.
 //   * This would allow things to be used as URLs for images.
-//   * APIs (such as FileTransfer) work better with URLs
+//   * APIs (such as FileTransfer) work better with URLs (Paths are annoying, esp with Windows using \)
 //   * Entry have a toURL() already. Without custom schemes, it won't work for Android resources & assets
 // * Add support resolveLocalFileSystemURL()?
 
@@ -58,7 +58,7 @@ fileextras.getDirectoryForPurpose = function(purpose, options, successCallback, 
         successCallback(directoryEntry);
     };
 
-    var purposeInt = Persistence[purpose];
+    var purposeInt = Purpose[purpose];
     if (typeof purposeInt == 'undefined') {
         throw new Error('getDirectoryForPurpose: invalid purpose: ' + purpose);
     }

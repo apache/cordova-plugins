@@ -28,7 +28,7 @@
   <dependency id="org.apache.cordova.file" />
 
   <js-module src="fileextras.js" name="FileExtras">
-    <clobbers target="cordova.plugins.fileExtras" />
+    <clobbers target="cordova.plugins.fileextras" />
   </js-module>
 
   <platform name="android">
