@@ -4,7 +4,7 @@
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="org.apache.cordova.keyboard"
-    version="0.1.0">
+    version="0.1.1">
     <name>Keyboard</name>
     <description>Cordova Keyboard Plugin</description>
     <license>Apache 2.0</license>
