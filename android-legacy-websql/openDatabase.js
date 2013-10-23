@@ -20,7 +20,7 @@
 
 
 var modulemapper = require('cordova/modulemapper'),
-    storage = require('./storage');
+    legacywebsql = require('./legacywebsql');
 
 var originalOpenDatabase = modulemapper.getOriginalSymbol(window, 'openDatabase');
 
@@ -28,7 +28,7 @@ module.exports = function(name, version, desc, size) {
     // First patch WebSQL if necessary
     if (!originalOpenDatabase) {
         // Not defined, create an openDatabase function for all to use!
-        return storage.openDatabase.apply(this, arguments);
+        return legacywebsql.openDatabase.apply(this, arguments);
     }
 
     // Defined, but some Android devices will throw a SECURITY_ERR -
@@ -41,7 +41,7 @@ module.exports = function(name, version, desc, size) {
             throw ex;
         }
     }
-    return storage.openDatabase(name, version, desc, size);
+    return legacywebsql.openDatabase(name, version, desc, size);
 };
 
 

@@ -16,7 +16,7 @@
        specific language governing permissions and limitations
        under the License.
 */
-package org.apache.cordova.labs.storage;
+package org.apache.cordova.legacywebsql;
 
 import java.io.File;
 
@@ -30,12 +30,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
 
-/**
- * This class implements the HTML5 database support to work around a bug for
- * Android 3.0 devices. It is not used for other versions of Android, since
- * HTML5 database is built in to the browser.
- */
-public class Storage extends CordovaPlugin {
+public class LegacyWebSql extends CordovaPlugin {
 
     // Data Definition Language
     private static final String ALTER = "alter";
@@ -46,12 +41,6 @@ public class Storage extends CordovaPlugin {
     SQLiteDatabase myDb = null; // Database object
     String path = null; // Database path
     String dbName = null; // Database name
-
-    /**
-     * Constructor.
-     */
-    public Storage() {
-    }
 
     /**
      * Executes the request and returns PluginResult.

@@ -256,7 +256,7 @@ DroidDB_Tx.prototype.executeSql = function(sql, params, successCallback, errorCa
     query.errorCallback = errorCallback;
 
     // Call native code
-    exec(null, null, "Storage", "executeSql", [sql, params, query.id]);
+    exec(null, null, "LegacyWebSql", "executeSql", [sql, params, query.id]);
 };
 
 var DatabaseShell = function() {
@@ -298,7 +298,7 @@ DatabaseShell.prototype.transaction = function(process, errorCallback, successCa
  * @return                  Database object
  */
 var DroidDB_openDatabase = function(name, version, display_name, size) {
-    exec(null, null, "Storage", "openDatabase", [name, version, display_name, size]);
+    exec(null, null, "LegacyWebSql", "openDatabase", [name, version, display_name, size]);
     var db = new DatabaseShell();
     return db;
 };
