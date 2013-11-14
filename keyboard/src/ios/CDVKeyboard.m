@@ -228,7 +228,7 @@
 - (void)formAccessoryBarKeyboardWillHide:(NSNotification*)notif
 {
     // restore the scrollview frame
-    self.webView.scrollView.frame = self.webView.frame;
+    self.webView.scrollView.frame = CGRectMake(0, 0, self.webView.frame.size.width, self.webView.frame.size.height);
 }
 
 // //////////////////////////////////////////////////
