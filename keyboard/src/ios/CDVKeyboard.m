@@ -238,11 +238,12 @@
     if (!_shrinkView) {
         return;
     }
+    _savedWebViewFrame = self.webView.frame;
 
     CGRect keyboardFrame = [notif.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     keyboardFrame = [self.viewController.view convertRect:keyboardFrame fromView:nil];
 
-    CGRect newFrame = self.viewController.view.bounds;
+    CGRect newFrame = _savedWebViewFrame;
     CGFloat actualKeyboardHeight = (keyboardFrame.size.height - _accessoryBarHeight);
     newFrame.size.height -= actualKeyboardHeight;
 
@@ -261,7 +262,7 @@
     CGRect keyboardFrame = [notif.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     keyboardFrame = [self.viewController.view convertRect:keyboardFrame fromView:nil];
 
-    CGRect newFrame = self.viewController.view.bounds;
+    CGRect newFrame = _savedWebViewFrame;
     self.webView.scrollView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
     self.webView.frame = newFrame;
 }

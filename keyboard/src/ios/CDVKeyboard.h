@@ -21,6 +21,8 @@
 
 @interface CDVKeyboard : CDVPlugin {
     @protected
+    CGRect _savedWebViewFrame;
+    @protected
     BOOL _shrinkView;
     @protected
     BOOL _hideFormAccessoryBar;
