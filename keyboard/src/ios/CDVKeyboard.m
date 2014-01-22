@@ -148,6 +148,9 @@
     if (ashrinkView == _shrinkView) {
         return;
     }
+    if (IsAtLeastiOSVersion(@"7.0")) {
+        return;
+    }
 
     if (ashrinkView) {
         [nc removeObserver:_shrinkViewKeyboardShowObserver];
@@ -238,6 +241,9 @@
     if (!_shrinkView) {
         return;
     }
+    if (IsAtLeastiOSVersion(@"7.0")) {
+        return;
+    }
     _savedWebViewFrame = self.webView.frame;
 
     CGRect keyboardFrame = [notif.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
@@ -257,6 +263,9 @@
 
 - (void)shrinkViewKeyboardWillHideHelper:(NSNotification*)notif
 {
+    if (IsAtLeastiOSVersion(@"7.0")) {
+        return;
+    }
     self.webView.scrollView.scrollEnabled = YES;
 
     CGRect keyboardFrame = [notif.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
