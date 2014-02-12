@@ -19,6 +19,8 @@
 */
 
 #import <Cordova/CDVPlugin.h>
+#import "CDVFile.h"
+#import "CDVLocalFilesystem.h"
 
 enum FileSystemPurpose {
     DATA = 0,
@@ -29,10 +31,70 @@ enum FileSystemPurpose {
 };
 typedef int FileSystemPurpose;
 
-@interface FileExtras : CDVPlugin
+@interface FileExtras : CDVPlugin {
+    NSDictionary *availableFilesystems;
+    NSMutableSet *installedFilesystems;
+}
 @end
 
 @implementation FileExtras
+
+- (id)initWithWebView:(UIWebView*)theWebView
+{
+    self = [super initWithWebView:theWebView];
+    if (self) {
+        NSString *libPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        availableFilesystems = @{
+            @"library": libPath,
+            @"library-nosync": [libPath stringByAppendingPathComponent:@"NoCloud"],
+            @"documents": docPath,
+            @"documents-nosync": [docPath stringByAppendingPathComponent:@"NoCloud"],
+            @"cache": [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0],
+            @"bundle": [[NSBundle mainBundle] bundlePath],
+            @"root": @"/"
+        };
+        installedFilesystems = [[NSMutableSet alloc] initWithCapacity:7];
+    }
+    return self;
+}
+
+- (void)pluginInitialize
+{
+    id vc = self.viewController;
+    
+    NSDictionary *settings = [vc settings];
+    NSString *filesystemsStr = [[settings objectForKey:@"iosextrafilesystems"] lowercaseString];
+    if (!filesystemsStr) {
+        filesystemsStr = @"library,library-nosync,documents,documents-nosync,cache,bundle";
+    }
+    NSArray *filesystems = [filesystemsStr componentsSeparatedByString:@","];
+    
+    /* Build non-syncable directories as necessary */
+    for (NSString *nonSyncFS in @[@"library-nosync", @"documents-nosync"]) {
+        if ([filesystems containsObject:nonSyncFS]) {
+            [self makeNonSyncable:[availableFilesystems objectForKey:nonSyncFS]];
+        }
+    }
+    
+    CDVFile *filePlugin = [[vc commandDelegate] getCommandInstance:@"File"];
+    if (filePlugin) {
+        /* Register filesystems in order */
+        for (NSString *fsName in filesystems) {
+            if (![installedFilesystems containsObject:fsName]) {
+                NSString *fsRoot = [availableFilesystems objectForKey:fsName];
+                if (fsRoot) {
+                    [filePlugin registerFilesystem:[[CDVLocalFilesystem alloc] initWithName:fsName root:fsRoot]];
+                    [installedFilesystems addObject:fsName];
+                } else {
+                    NSLog(@"Unrecognized extra filesystem identifier: %@", fsName);
+                }
+            }
+        }
+    } else {
+        NSLog(@"File plugin not found; cannot initialize file-extras plugin");
+    }
+}
 
 - (void)makeNonSyncable:(NSString*)path {
     [[NSFileManager defaultManager] createDirectoryAtPath:path
@@ -53,29 +115,33 @@ typedef int FileSystemPurpose;
     NSString *path = nil;
 
     switch (purpose) {
-        case DATA:
-            path = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            if (!syncable) {
-                path = [path stringByAppendingPathComponent:@"NoCloud"];
-                [self makeNonSyncable:path];
-            }
-            break;
+      case DATA:
+        if (syncable && [installedFilesystems containsObject:@"library"]) {
+            path = @"cdvfile://localhost/library/";
+        } else if ([installedFilesystems containsObject:@"library-nosync"]) {
+            path = @"cdvfile://localhost/library-nosync/";
+        }
+        break;
       case DOCUMENTS:
-            path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-            if (!syncable) {
-                path = [path stringByAppendingPathComponent:@"NoCloud"];
-                [self makeNonSyncable:path];
-            }
-            break;
+        if (syncable && [installedFilesystems containsObject:@"documents"]) {
+            path = @"cdvfile://localhost/documents/";
+        } else if ([installedFilesystems containsObject:@"documents-nosync"]) {
+            path = @"cdvfile://localhost/documents-nosync/";
+        }
+        break;
       case CACHE:
-          path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-          break;
+        if ([installedFilesystems containsObject:@"cache"]) {
+            path = @"cdvfile://localhost/cache/";
+        }
+        break;
       case TEMP:
-          path = NSTemporaryDirectory();
-          break;
+        path = @"cdvfile://localhost/temporary/";
+        break;
       case IOS_BUNDLE:
-          path = [[NSBundle mainBundle] bundlePath];
-          break;
+        if ([installedFilesystems containsObject:@"bundle"]) {
+            path = @"cdvfile://localhost/bundle/";
+        }
+        break;
     }
 
     CDVPluginResult *pluginResult = nil;
@@ -83,11 +149,6 @@ typedef int FileSystemPurpose;
     if (!path) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
     } else {
-        // Remove the trailing slash if it's there.
-        if ([path hasSuffix:@"/"]) {
-            path = [path substringToIndex:[path length] - 1];
-        }
-
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:path];
     }
 

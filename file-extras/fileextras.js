@@ -52,10 +52,7 @@ var Purpose = {
 fileextras.getDirectoryForPurpose = function(purpose, options, successCallback, failureCallback) {
     argscheck.checkArgs('sOfF', 'fileextras.getDirectoryForPurpose', arguments);
     var augmentedSuccessCallback = successCallback && function(fullPath) {
-        var lastSegment = fullPath.replace(/.*\//, '');
-        // Note: the fileSystem property is null
-        var directoryEntry = new DirectoryEntry(lastSegment, fullPath);
-        successCallback(directoryEntry);
+        resolveLocalFileSystemURL(fullPath, successCallback, failureCallback);
     };
 
     var purposeInt = Purpose[purpose];
