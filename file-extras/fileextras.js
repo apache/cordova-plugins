@@ -86,3 +86,7 @@ fileextras.getCacheDirectory = function(successCallback) {
     fileextras.getDirectoryForPurpose('cache', null, successCallback);
 };
 
+fileextras.getFilesystemRoot = function(filesystemName, successCallback, failureCallback) {
+    argscheck.checkArgs('sfF', 'fileextras.getFilesystemRoot', arguments);
+    resolveLocalFileSystemURL('cdvfile://localhost/'+filesystemName+'/', successCallback, failureCallback);
+};
