@@ -44,15 +44,15 @@ public class FileSystemRoots extends CordovaPlugin {
     private static final int PURPOSE_TEMP = 3;
     private static final String TAG = "file-system-roots";
 
-	private HashSet<String> installedFilesystems;
-	private HashMap<String, String> availableFilesystems;
+    private HashSet<String> installedFilesystems;
+    private HashMap<String, String> availableFilesystems;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-    	Activity activity = cordova.getActivity();
-    	Context context = activity.getApplicationContext();
+        Activity activity = cordova.getActivity();
+        Context context = activity.getApplicationContext();
 
         availableFilesystems = new HashMap<String,String>();
         availableFilesystems.put("files", context.getFilesDir().getAbsolutePath());
@@ -67,28 +67,28 @@ public class FileSystemRoots extends CordovaPlugin {
 
         String filesystemsStr = activity.getIntent().getStringExtra("androidextrafilesystems");
         if (filesystemsStr == null) {
-        	filesystemsStr = "files,files-external,documents,sdcard,cache,cache-external";
+            filesystemsStr = "files,files-external,documents,sdcard,cache,cache-external";
         }
 
         String[] filesystems = filesystemsStr.split(",");
 
         FileUtils filePlugin = (FileUtils)webView.pluginManager.getPlugin("File");
         if (filePlugin != null) {
-        	/* Register filesystems in order */
-        	for (String fsName: filesystems) {
-        		if (!installedFilesystems.contains(fsName)) {
-        			String fsRoot = availableFilesystems.get(fsName);
-        			if (fsRoot != null) {
-        				new File(fsRoot).mkdirs();
-        				filePlugin.registerFilesystem(new LocalFilesystem(fsName, cordova, fsRoot));
-        				installedFilesystems.add(fsName);
-        			} else {
-        				Log.d(TAG, "Unrecognized extra filesystem identifier: " + fsName);
-        			}
-        		}
-        	}
+            /* Register filesystems in order */
+            for (String fsName: filesystems) {
+                if (!installedFilesystems.contains(fsName)) {
+                    String fsRoot = availableFilesystems.get(fsName);
+                    if (fsRoot != null) {
+                        new File(fsRoot).mkdirs();
+                        filePlugin.registerFilesystem(new LocalFilesystem(fsName, cordova, fsRoot));
+                        installedFilesystems.add(fsName);
+                    } else {
+                        Log.d(TAG, "Unrecognized extra filesystem identifier: " + fsName);
+                    }
+                }
+            }
         } else {
-        	Log.d(TAG, "File plugin not found; cannot initialize file-extras plugin");
+            Log.d(TAG, "File plugin not found; cannot initialize file-extras plugin");
         }
 
     }
