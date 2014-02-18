@@ -17,7 +17,7 @@
  * under the License.
  *
 */
-package org.apache.cordova.fileextras;
+package org.apache.cordova.file_system_roots;
 
 import android.app.Activity;
 import android.content.Context;
@@ -37,12 +37,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class FileExtras extends CordovaPlugin {
+public class FileSystemRoots extends CordovaPlugin {
     private static final int PURPOSE_DATA = 0;
     private static final int PURPOSE_DOCUMENTS = 1;
     private static final int PURPOSE_CACHE = 2;
     private static final int PURPOSE_TEMP = 3;
-	private static final String TAG = "file-extras";
+    private static final String TAG = "file-system-roots";
 
 	private HashSet<String> installedFilesystems;
 	private HashMap<String, String> availableFilesystems;

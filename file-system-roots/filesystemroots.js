@@ -36,8 +36,6 @@ var DirectoryEntry = require('org.apache.cordova.file.DirectoryEntry');
 // * Add support resolveLocalFileSystemURL()?
 
 
-var fileextras = exports;
-
 var Purpose = {
     'data': 0, // General application data (default)
     'documents': 1, // Files that are meaningful to other applciations (e.g. Office files)
@@ -49,7 +47,7 @@ var Purpose = {
 /**
  * Supplies a DirectoryEntry that matches the given constraints to the given callback.
  */
-fileextras.getDirectoryForPurpose = function(purpose, options, successCallback, failureCallback) {
+exports.getDirectoryForPurpose = function(purpose, options, successCallback, failureCallback) {
     argscheck.checkArgs('sOfF', 'fileextras.getDirectoryForPurpose', arguments);
     var augmentedSuccessCallback = successCallback && function(fullPath) {
         resolveLocalFileSystemURL(fullPath, successCallback, failureCallback);
@@ -68,25 +66,25 @@ fileextras.getDirectoryForPurpose = function(purpose, options, successCallback, 
     exec(augmentedSuccessCallback, failureCallback, "FileExtras", "getDirectoryForPurpose", args);
 };
 
-fileextras.getDataDirectory = function(syncable, successCallback) {
+exports.getDataDirectory = function(syncable, successCallback) {
     argscheck.checkArgs('*f', 'fileextras.getDataDirectory', arguments);
-    fileextras.getDirectoryForPurpose('data', { syncable: syncable }, successCallback);
+    exports.getDirectoryForPurpose('data', { syncable: syncable }, successCallback);
 };
 
 // On Android, this is the root of the SD card.
-fileextras.getDocumentsDirectory = function(successCallback) {
-    fileextras.getDirectoryForPurpose('documents', { syncable: true, sandboxed: false }, successCallback);
+exports.getDocumentsDirectory = function(successCallback) {
+    exports.getDirectoryForPurpose('documents', { syncable: true, sandboxed: false }, successCallback);
 };
 
-fileextras.getTempDirectory = function(successCallback) {
-    fileextras.getDirectoryForPurpose('temp', null, successCallback);
+exports.getTempDirectory = function(successCallback) {
+    exports.getDirectoryForPurpose('temp', null, successCallback);
 };
 
-fileextras.getCacheDirectory = function(successCallback) {
-    fileextras.getDirectoryForPurpose('cache', null, successCallback);
+exports.getCacheDirectory = function(successCallback) {
+    exports.getDirectoryForPurpose('cache', null, successCallback);
 };
 
-fileextras.getFilesystemRoot = function(filesystemName, successCallback, failureCallback) {
+exports.getFilesystemRoot = function(filesystemName, successCallback, failureCallback) {
     argscheck.checkArgs('sfF', 'fileextras.getFilesystemRoot', arguments);
     resolveLocalFileSystemURL('cdvfile://localhost/'+filesystemName+'/', successCallback, failureCallback);
 };

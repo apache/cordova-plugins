@@ -31,13 +31,13 @@ enum FileSystemPurpose {
 };
 typedef int FileSystemPurpose;
 
-@interface FileExtras : CDVPlugin {
+@interface FileSystemRoots : CDVPlugin {
     NSDictionary *availableFilesystems;
     NSMutableSet *installedFilesystems;
 }
 @end
 
-@implementation FileExtras
+@implementation FileSystemRoots
 
 - (id)initWithWebView:(UIWebView*)theWebView
 {
@@ -92,7 +92,7 @@ typedef int FileSystemPurpose;
             }
         }
     } else {
-        NSLog(@"File plugin not found; cannot initialize file-extras plugin");
+        NSLog(@"File plugin not found; cannot initialize file-system-roots plugin");
     }
 }
 

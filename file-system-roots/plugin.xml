@@ -18,7 +18,7 @@
  under the License.
 -->
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
-    id="org.apache.cordova.file-extras"
+    id="org.apache.cordova.file-system-roots"
     version="0.2.0-dev">
   <engines>
     <engine name="cordova" version=">=3.0.0" />
@@ -27,27 +27,27 @@
   <name>File Extras</name>
   <dependency id="org.apache.cordova.file" version=">=1.0.0" />
 
-  <js-module src="fileextras.js" name="FileExtras">
-    <clobbers target="cordova.plugins.fileextras" />
+  <js-module src="FileSystemRoots.js" name="FileSystemRoots">
+    <clobbers target="cordova.filesystem" />
   </js-module>
 
   <platform name="android">
-    <source-file src="android/FileExtras.java" target-dir="src/org/apache/cordova/fileextras" />
+    <source-file src="android/FileSystemRoots.java" target-dir="src/org/apache/cordova/file-system-roots" />
 
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="FileExtras">
-        <param name="android-package" value="org.apache.cordova.fileextras.FileExtras"/>
+        <param name="android-package" value="org.apache.cordova.file-system-roots.FileSystemRoots"/>
         <param name="onload" value="true"/>
       </feature>
     </config-file>
   </platform>
 
   <platform name="ios">
-    <source-file src="ios/FileExtras.m" />
+    <source-file src="ios/FileSystemRoots.m" />
 
     <config-file target="config.xml" parent="/*">
-      <feature name="FileExtras">
-        <param name="ios-package" value="FileExtras"/>
+      <feature name="FileSystemRoots">
+        <param name="ios-package" value="FileSystemRoots"/>
       </feature>
     </config-file>
   </platform>
