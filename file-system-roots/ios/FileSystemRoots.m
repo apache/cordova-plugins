@@ -39,32 +39,26 @@ typedef int FileSystemPurpose;
 
 @implementation FileSystemRoots
 
-- (id)initWithWebView:(UIWebView*)theWebView
-{
-    self = [super initWithWebView:theWebView];
-    if (self) {
-        NSString *libPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-        NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-        availableFilesystems = @{
-            @"library": libPath,
-            @"library-nosync": [libPath stringByAppendingPathComponent:@"NoCloud"],
-            @"documents": docPath,
-            @"documents-nosync": [docPath stringByAppendingPathComponent:@"NoCloud"],
-            @"cache": [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0],
-            @"bundle": [[NSBundle mainBundle] bundlePath],
-            @"root": @"/"
-        };
-        installedFilesystems = [[NSMutableSet alloc] initWithCapacity:7];
-    }
-    return self;
-}
-
 - (void)pluginInitialize
 {
+    NSString *libPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    availableFilesystems = @{
+        @"library": libPath,
+        @"library-nosync": [libPath stringByAppendingPathComponent:@"NoCloud"],
+        @"documents": docPath,
+        @"documents-nosync": [docPath stringByAppendingPathComponent:@"NoCloud"],
+        @"cache": [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0],
+        @"bundle": [[NSBundle mainBundle] bundlePath],
+        @"root": @"/"
+    };
+    installedFilesystems = [[NSMutableSet alloc] initWithCapacity:7];
+
+    /* Get filesystems to be installed from settings */
     id vc = self.viewController;
     
     NSDictionary *settings = [vc settings];
-    NSString *filesystemsStr = [[settings objectForKey:@"iosextrafilesystems"] lowercaseString];
+    NSString *filesystemsStr = [settings[@"iosextrafilesystems"] lowercaseString];
     if (!filesystemsStr) {
         filesystemsStr = @"library,library-nosync,documents,documents-nosync,cache,bundle";
     }
@@ -73,7 +67,7 @@ typedef int FileSystemPurpose;
     /* Build non-syncable directories as necessary */
     for (NSString *nonSyncFS in @[@"library-nosync", @"documents-nosync"]) {
         if ([filesystems containsObject:nonSyncFS]) {
-            [self makeNonSyncable:[availableFilesystems objectForKey:nonSyncFS]];
+            [self makeNonSyncable:availableFilesystems[nonSyncFS]];
         }
     }
     
@@ -82,7 +76,7 @@ typedef int FileSystemPurpose;
         /* Register filesystems in order */
         for (NSString *fsName in filesystems) {
             if (![installedFilesystems containsObject:fsName]) {
-                NSString *fsRoot = [availableFilesystems objectForKey:fsName];
+                NSString *fsRoot = availableFilesystems[fsName];
                 if (fsRoot) {
                     [filePlugin registerFilesystem:[[CDVLocalFilesystem alloc] initWithName:fsName root:fsRoot]];
                     [installedFilesystems addObject:fsName];
