@@ -20,7 +20,6 @@
 
 var exec = require('cordova/exec');
 var argscheck = require('cordova/argscheck');
-var DirectoryEntry = require('org.apache.cordova.file.DirectoryEntry');
 
 
 // Open Discussion:
@@ -48,7 +47,7 @@ var Purpose = {
  * Supplies a DirectoryEntry that matches the given constraints to the given callback.
  */
 exports.getDirectoryForPurpose = function(purpose, options, successCallback, failureCallback) {
-    argscheck.checkArgs('sOfF', 'fileextras.getDirectoryForPurpose', arguments);
+    argscheck.checkArgs('sOfF', 'cordova.filesystem.getDirectoryForPurpose', arguments);
     var augmentedSuccessCallback = successCallback && function(fullPath) {
         resolveLocalFileSystemURL(fullPath, successCallback, failureCallback);
     };
@@ -63,11 +62,11 @@ exports.getDirectoryForPurpose = function(purpose, options, successCallback, fai
     var syncable = typeof options.syncable == 'undefined' ? true : !!options.syncable;
 
     var args = [purposeInt, sandboxed, syncable];
-    exec(augmentedSuccessCallback, failureCallback, "FileExtras", "getDirectoryForPurpose", args);
+    exec(augmentedSuccessCallback, failureCallback, "FileSystemRoots", "getDirectoryForPurpose", args);
 };
 
 exports.getDataDirectory = function(syncable, successCallback) {
-    argscheck.checkArgs('*f', 'fileextras.getDataDirectory', arguments);
+    argscheck.checkArgs('*f', 'cordova.filesystem.getDataDirectory', arguments);
     exports.getDirectoryForPurpose('data', { syncable: syncable }, successCallback);
 };
 
@@ -84,7 +83,7 @@ exports.getCacheDirectory = function(successCallback) {
     exports.getDirectoryForPurpose('cache', null, successCallback);
 };
 
-exports.getFilesystemRoot = function(filesystemName, successCallback, failureCallback) {
-    argscheck.checkArgs('sfF', 'fileextras.getFilesystemRoot', arguments);
-    resolveLocalFileSystemURL('cdvfile://localhost/'+filesystemName+'/', successCallback, failureCallback);
+exports.getFileSystemRoot = function(fileSystemName, successCallback, failureCallback) {
+    argscheck.checkArgs('sfF', 'cordova.filesystem.getFileSystemRoot', arguments);
+    resolveLocalFileSystemURL('cdvfile://localhost/'+fileSystemName+'/', successCallback, failureCallback);
 };
