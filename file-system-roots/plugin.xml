@@ -32,11 +32,11 @@
   </js-module>
 
   <platform name="android">
-    <source-file src="android/FileSystemRoots.java" target-dir="src/org/apache/cordova/file-system-roots" />
+    <source-file src="android/FileSystemRoots.java" target-dir="src/org/apache/cordova/filesystemroots" />
 
     <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="FileExtras">
-        <param name="android-package" value="org.apache.cordova.file-system-roots.FileSystemRoots"/>
+      <feature name="FileSystemRoots">
+        <param name="android-package" value="org.apache.cordova.filesystemroots.FileSystemRoots"/>
         <param name="onload" value="true"/>
       </feature>
     </config-file>

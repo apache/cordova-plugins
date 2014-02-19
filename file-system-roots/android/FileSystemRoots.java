@@ -17,7 +17,7 @@
  * under the License.
  *
 */
-package org.apache.cordova.file_system_roots;
+package org.apache.cordova.filesystemroots;
 
 import android.app.Activity;
 import android.content.Context;
@@ -75,20 +75,24 @@ public class FileSystemRoots extends CordovaPlugin {
         FileUtils filePlugin = (FileUtils)webView.pluginManager.getPlugin("File");
         if (filePlugin != null) {
             /* Register filesystems in order */
-            for (String fsName: filesystems) {
+            for (String fsName : filesystems) {
                 if (!installedFilesystems.contains(fsName)) {
                     String fsRoot = availableFilesystems.get(fsName);
                     if (fsRoot != null) {
-                        new File(fsRoot).mkdirs();
-                        filePlugin.registerFilesystem(new LocalFilesystem(fsName, cordova, fsRoot));
-                        installedFilesystems.add(fsName);
+                        File newRoot = new File(fsRoot);
+                        if (newRoot.mkdirs() || newRoot.isDirectory()) {
+                            filePlugin.registerFilesystem(new LocalFilesystem(fsName, cordova, fsRoot));
+                            installedFilesystems.add(fsName);
+                        } else {
+                           Log.d(TAG, "Unable to create root dir for fileystem \"" + fsName + "\", skipping");
+                        }
                     } else {
                         Log.d(TAG, "Unrecognized extra filesystem identifier: " + fsName);
                     }
                 }
             }
         } else {
-            Log.d(TAG, "File plugin not found; cannot initialize file-extras plugin");
+            Log.w(TAG, "File plugin not found; cannot initialize file-extras plugin");
         }
 
     }
