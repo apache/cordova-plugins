@@ -31,7 +31,7 @@ By default, the library and documents directories can be synced to iCloud. You c
 Configuring the plugin
 ----------------------
 
-The set of available filesystems can be configured at build time per-platform. Both iOS and Android recognize a <preference> tag in `config.xml` which names the filesystems to be installed, in order. The defaults for these preferences, if not set, are
+The set of available filesystems can be configured at build time per-platform. Both iOS and Android recognize a <preference> tag in `config.xml` which names the filesystems to be installed. The defaults for these preferences, if not set, are
 
     <preference name="iosExtraFilesystems" value="library,library-nosync,documents,documents-nosync,cache,bundle" />
 
