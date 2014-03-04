@@ -19,7 +19,7 @@
 -->
 <plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
     id="org.apache.cordova.file-system-roots"
-    version="0.2.0-dev">
+    version="0.1.0">
   <engines>
     <engine name="cordova" version=">=3.0.0" />
   </engines>
