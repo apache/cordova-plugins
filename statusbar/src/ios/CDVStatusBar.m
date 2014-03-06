@@ -101,7 +101,7 @@ static const void *kStatusBarStyle = &kStatusBarStyle;
     _statusBarOverlaysWebView = YES; // default
     
     [self initializeStatusBarBackgroundView];
-    
+
     [self styleLightContent:nil]; // match default backgroundColor of #000000
     self.viewController.view.autoresizesSubviews = YES;
     
@@ -150,7 +150,11 @@ static const void *kStatusBarStyle = &kStatusBarStyle;
     if (statusBarOverlaysWebView) {
         
         [_statusBarBackgroundView removeFromSuperview];
-        self.webView.frame = bounds;
+        if (UIDeviceOrientationIsLandscape(self.viewController.interfaceOrientation)) {
+            self.webView.frame = CGRectMake(0, 0, bounds.size.height, bounds.size.width);
+        } else {
+            self.webView.frame = bounds;
+        }
 
     } else {
 
@@ -315,16 +319,20 @@ static const void *kStatusBarStyle = &kStatusBarStyle;
             [_statusBarBackgroundView removeFromSuperview];
         }
         
-        CGRect frame = self.webView.frame;
-        frame.origin.y = 0;
+        if (!_statusBarOverlaysWebView) {
         
-        if (UIDeviceOrientationIsLandscape(self.viewController.interfaceOrientation)) {
-            frame.size.height += statusBarFrame.size.width;
-        } else {
-            frame.size.height += statusBarFrame.size.height;
+            CGRect frame = self.webView.frame;
+            frame.origin.y = 0;
+        
+            if (UIDeviceOrientationIsLandscape(self.viewController.interfaceOrientation)) {
+                frame.size.height += statusBarFrame.size.width;
+            } else {
+                frame.size.height += statusBarFrame.size.height;
+            }
+            
+            self.webView.frame = frame;
         }
         
-        self.webView.frame = frame;
         _statusBarBackgroundView.hidden = YES;
     }
 }
