@@ -204,7 +204,12 @@
                 for (UIView* peripheralView in view.subviews) {
                     // hides the backdrop (iOS 7)
                     if ([[peripheralView description] hasPrefix:@"<UIKBInputBackdropView"]) {
-                        [[peripheralView layer] setOpacity:0.0];
+                        // check that this backdrop is for the accessory bar (at the top),
+                        // sparing the backdrop behind the main keyboard
+                        CGRect rect = peripheralView.frame;
+                        if (rect.origin.y == 0) {
+                            [[peripheralView layer] setOpacity:0.0];
+                        }
                     }
 
                     // hides the accessory bar
