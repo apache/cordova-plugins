@@ -79,6 +79,19 @@
             [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = false;if (Keyboard.onhide) Keyboard.onhide();"];
             weakSelf.keyboardIsVisible = NO;
         }];
+
+    _keyboardWillShowObserver = [nc addObserverForName:UIKeyboardWillShowNotification
+                                            object:nil
+                                             queue:[NSOperationQueue mainQueue]
+                                        usingBlock:^(NSNotification* notification) {
+            [weakSelf.commandDelegate evalJs:@"if (Keyboard.onshowing) Keyboard.onshowing();"];
+        }];
+    _keyboardWillHideObserver = [nc addObserverForName:UIKeyboardWillHideNotification
+                                            object:nil
+                                             queue:[NSOperationQueue mainQueue]
+                                        usingBlock:^(NSNotification* notification) {
+            [weakSelf.commandDelegate evalJs:@"if (Keyboard.onhiding) Keyboard.onhiding();"];
+        }];
 }
 
 // //////////////////////////////////////////////////

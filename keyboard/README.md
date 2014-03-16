@@ -26,6 +26,8 @@ Events
 
 - Keyboard.onshow
 - Keyboard.onhide
+- Keyboard.onshowing
+- Keyboard.onhiding
 
 
 Permissions
@@ -155,7 +157,7 @@ Keyboard.onhide
 
 If defined, this function fired when keyboard fully closed.
 
-    Keyboard.onshow = function () {
+    Keyboard.onhide = function () {
         // Describe your logic which will be run each time keyboard is closed.
     }
 
@@ -169,3 +171,44 @@ Supported Platforms
 -------------------
 
 - iOS
+
+Keyboard.onshowing
+=================
+
+If defined, this function fired before keyboard will be shown.
+
+    Keyboard.onshowing = function () {
+        // Describe your logic which will be run each time when keyboard is about to be shown.
+    }
+
+Description
+-----------
+
+Attach handler to this event to be able to receive notification when keyboard is about to be shown on the screen.
+
+
+Supported Platforms
+-------------------
+
+- iOS
+
+Keyboard.onhiding
+=================
+
+If defined, this function fired when keyboard fully closed.
+
+    Keyboard.onhiding = function () {
+        // Describe your logic which will be run each time when keyboard is about to be closed.
+    }
+
+Description
+-----------
+
+Attach handler to this event to be able to receive notification when keyboard is about to be closed.
+
+
+Supported Platforms
+-------------------
+
+- iOS
+
