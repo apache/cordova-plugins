@@ -69,15 +69,28 @@
                                             object:nil
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
-            [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = true;"];
+            [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = true;if (Keyboard.onshow) Keyboard.onshow();"];
             weakSelf.keyboardIsVisible = YES;
         }];
     _keyboardHideObserver = [nc addObserverForName:UIKeyboardDidHideNotification
                                             object:nil
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
-            [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = false;"];
+            [weakSelf.commandDelegate evalJs:@"Keyboard.isVisible = false;if (Keyboard.onhide) Keyboard.onhide();"];
             weakSelf.keyboardIsVisible = NO;
+        }];
+
+    _keyboardWillShowObserver = [nc addObserverForName:UIKeyboardWillShowNotification
+                                            object:nil
+                                             queue:[NSOperationQueue mainQueue]
+                                        usingBlock:^(NSNotification* notification) {
+            [weakSelf.commandDelegate evalJs:@"if (Keyboard.onshowing) Keyboard.onshowing();"];
+        }];
+    _keyboardWillHideObserver = [nc addObserverForName:UIKeyboardWillHideNotification
+                                            object:nil
+                                             queue:[NSOperationQueue mainQueue]
+                                        usingBlock:^(NSNotification* notification) {
+            [weakSelf.commandDelegate evalJs:@"if (Keyboard.onhiding) Keyboard.onhiding();"];
         }];
 }
 

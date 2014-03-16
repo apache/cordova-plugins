@@ -27,7 +27,7 @@
     @protected
     BOOL _hideFormAccessoryBar;
     @protected
-    id _keyboardShowObserver, _keyboardHideObserver;
+    id _keyboardShowObserver, _keyboardHideObserver, _keyboardWillShowObserver, _keyboardWillHideObserver;
     @protected
     id _hideFormAccessoryBarKeyboardShowObserver, _hideFormAccessoryBarKeyboardHideObserver;
     @protected
