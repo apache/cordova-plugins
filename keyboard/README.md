@@ -21,6 +21,12 @@ Properties
 
 - Keyboard.isVisible
 
+Events
+--------
+
+- Keyboard.onshow
+- Keyboard.onhide
+
 
 Permissions
 -----------
@@ -124,4 +130,42 @@ Supported Platforms
 
 - iOS
 
-    
+Keyboard.onshow
+=================
+
+If defined, this function fired when keyboard fully shown.
+
+    Keyboard.onshow = function () {
+        // Describe your logic which will be run each time keyboard is shown.
+    }
+
+Description
+-----------
+
+Attach handler to this event to be able to receive notification when keyboard is shown.
+
+
+Supported Platforms
+-------------------
+
+- iOS
+
+Keyboard.onhide
+=================
+
+If defined, this function fired when keyboard fully closed.
+
+    Keyboard.onshow = function () {
+        // Describe your logic which will be run each time keyboard is closed.
+    }
+
+Description
+-----------
+
+Attach handler to this event to be able to receive notification when keyboard is closed.
+
+
+Supported Platforms
+-------------------
+
+- iOS
