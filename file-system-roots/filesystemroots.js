@@ -70,7 +70,6 @@ exports.getDataDirectory = function(syncable, successCallback) {
     exports.getDirectoryForPurpose('data', { syncable: syncable }, successCallback);
 };
 
-// On Android, this is the root of the SD card.
 exports.getDocumentsDirectory = function(successCallback) {
     exports.getDirectoryForPurpose('documents', { syncable: true, sandboxed: false }, successCallback);
 };
