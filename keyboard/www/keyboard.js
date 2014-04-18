@@ -38,6 +38,38 @@ Keyboard.disableScrollingInShrinkView = function(disable) {
     exec(null, null, "Keyboard", "disableScrollingInShrinkView", [disable]);
 };
 
+Keyboard.fireOnShow = function() {
+    Keyboard.isVisible = true;
+    if (Keyboard.onshow) {
+        Keyboard.onshow();
+    }
+};
+Keyboard.fireOnHide = function() {
+    Keyboard.isVisible = false;
+    if (Keyboard.onhide) {
+        Keyboard.onhide();
+    }
+};
+Keyboard.fireOnHiding = function() {
+    // Automatic scroll to the top of the page
+    // to prevent quirks when using position:fixed elements
+    // inside WebKit browsers (iOS specifically).
+    // See CB-6444 for context.
+    if (Keyboard.automaticScrollToTopOnHiding) {
+        document.body.scrollLeft = 0;
+    }
+
+    if (Keyboard.onhiding) {
+        Keyboard.onhiding();
+    }
+};
+Keyboard.fireOnShowing = function() {
+    if (Keyboard.onshowing) {
+        Keyboard.onshowing();
+    }
+};
+
 Keyboard.isVisible = false;
+Keyboard.automaticScrollToTopOnHiding = false;
 
 module.exports = Keyboard;
