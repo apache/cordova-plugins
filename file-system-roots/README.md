@@ -3,9 +3,9 @@ org.apache.cordova.file-system-roots plugin
 
 This plugin provides getters for important filesystem locations (based on OS).
 
-The simplest method of using these new filesystems is to call `cordova.filesystem.getFilesystem` with the name of the filesystem you want to use.
+The simplest method of using these new filesystems is to call `cordova.filesystem.getFileSystemRoot` with the name of the filesystem you want to use.
 
-    cordova.filesystem.getFilesystemRoot(filesystemName, successCallback, errorCallback);
+    cordova.filesystem.getFileSystemRoot(fileSystemName, successCallback, errorCallback);
 
 If successful, `successCallback` will be called with a `DirectoryEntry` object representing the root of the filesystem. Otherwise, `errorCallback` will be called with a `FileError`.
 
