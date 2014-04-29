@@ -260,7 +260,10 @@
     if (!_shrinkView) {
         return;
     }
-    _savedWebViewFrame = self.webView.frame;
+
+    if (CGRectIsEmpty(_savedWebViewFrame)) {
+        _savedWebViewFrame = self.webView.frame;
+    }
 
     CGRect keyboardFrame = [notif.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     keyboardFrame = [self.viewController.view convertRect:keyboardFrame fromView:nil];
@@ -293,11 +296,10 @@
     keyboardFrame = [self.viewController.view convertRect:keyboardFrame fromView:nil];
 
     CGRect newFrame = _savedWebViewFrame;
-    newFrame.size.width = self.viewController.view.bounds.size.width - _savedWebViewFrame.origin.x;
-    newFrame.size.height = self.viewController.view.bounds.size.height - _savedWebViewFrame.origin.y;
-    
     self.webView.scrollView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
     self.webView.frame = newFrame;
+
+    _savedWebViewFrame = CGRectNull;
 }
 
 // //////////////////////////////////////////////////
