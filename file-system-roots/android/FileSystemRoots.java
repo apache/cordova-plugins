@@ -123,7 +123,7 @@ public class FileSystemRoots extends CordovaPlugin {
             case PURPOSE_DOCUMENTS:
                 if (sandboxed && installedFilesystems.contains("documents")) {
                     path = "cdvfile://localhost/documents/";
-                } else if (installedFilesystems.contains("scdard")) {
+                } else if (installedFilesystems.contains("sdcard")) {
                     path = "cdvfile://localhost/sdcard/";
                 }
                 break;
