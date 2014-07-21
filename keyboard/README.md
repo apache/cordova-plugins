@@ -1,7 +1,7 @@
 Keyboard
 ======
 
-> The `Keyboard` object provides some functions to customize the iOS keyboard.
+> The `Keyboard` object provides some functions to customize the keyboard on iOS and Android.
 
 This plugin has only been tested in Cordova 3.2 or greater, and its use in previous Cordova versions is not recommended (potential conflict with keyboard customization code present in the core in previous Cordova versions). 
 
@@ -15,6 +15,7 @@ Methods
 - Keyboard.shrinkView
 - Keyboard.hideFormAccessoryBar
 - Keyboard.disableScrollingInShrinkView
+- Keyboard.close
 
 Properties
 --------
@@ -112,6 +113,29 @@ Quick Example
     Keyboard.disableScrollingInShrinkView(true);
     Keyboard.disableScrollingInShrinkView(false);
 
+Keyboard.close
+=================
+
+Hide the keyboard.
+
+    Keyboard.close();
+
+Description
+-----------
+
+Close keyboard.
+
+
+Supported Platforms
+-------------------
+
+- Android
+
+Quick Example
+-------------
+
+    Keyboard.close();
+
 Keyboard.isVisible
 =================
 
@@ -131,6 +155,7 @@ Supported Platforms
 -------------------
 
 - iOS
+- Android
 
 Keyboard.onshow
 =================
@@ -151,6 +176,7 @@ Supported Platforms
 -------------------
 
 - iOS
+- Android
 
 Keyboard.onhide
 =================
@@ -171,6 +197,7 @@ Supported Platforms
 -------------------
 
 - iOS
+- Android
 
 Keyboard.onshowing
 =================
