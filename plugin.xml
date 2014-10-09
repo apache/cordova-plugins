@@ -17,8 +17,15 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<plugin id="io.shaz.plugin.cordova-local-webserver" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="io.shaz.plugin.cordova-local-webserver" version="2.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>CordovaLocalWebServer</name>
+    <description>Cordova Local Web Server Plugin</description>
+    <keywords>cordova,local web server</keywords>
+    <repo>https://github.com/shazron/CordovaLocalWebServer.git</repo>
+
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
     
     <!-- ios -->
     <platform name="ios">
@@ -27,7 +34,6 @@
 			    <param name="ios-package" value="SACordovaLocalWebServer"/>
 			    <param name="onload" value="true"/>
 		    </feature>
-            <preference name="CordovaLocalWebServerPort" value="64000" />
         </config-file>
 
 	    <header-file src="src/ios/SACordovaLocalWebServer.h" />
@@ -69,7 +75,7 @@
         <framework src="libz.dylib" />
         
         <info>
-        Modify your content tag in config.xml: &lt;content src="http:=//localhost:64000" /&gt;
+        Modify your content tag in config.xml to point to a http://localhost location, change the port to whatever you want, e.g. &lt;content src="http:=//localhost:8088" /&gt;
         </info>
 
     </platform> 

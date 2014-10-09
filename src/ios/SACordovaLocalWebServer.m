@@ -23,38 +23,32 @@
 
 @implementation SACordovaLocalWebServer
 
-- (id)settingForKey:(NSString*)key
-{
-    return [self.commandDelegate.settings objectForKey:[key lowercaseString]];
-}
-
 - (void) pluginInitialize {
     
+    BOOL useLocalWebServer = NO;
     NSString* indexPage = @"index.html";
-    NSUInteger port = 64000;
-    
-    // grab the port preference
-    NSString* setting  = @"CordovaLocalWebServerPort";
-    if ([self settingForKey:setting]) {
-        port = [[self settingForKey:setting] integerValue];
-    } else {
-        NSLog(@"CordovaLocalWebServerPort preference missing, using %ld", port);
-    }
-
-    // Create server
-    self.server = [[GCDWebServer alloc] init];
-    NSString* path = [self.commandDelegate pathForResource:indexPage];
-    
-    [self.server addGETHandlerForBasePath:@"/" directoryPath:[path stringByDeletingLastPathComponent] indexFilename:@"index.html" cacheAge:0 allowRangeRequests:YES];
-    [self.server startWithPort:port bonjourName:nil];
-    [GCDWebServer setLogLevel:kGCDWebServerLogLevel_Error];
+    NSUInteger port = 80;
     
     // check the content tag src
     CDVViewController* vc = (CDVViewController*)self.viewController;
-    NSString* expectedStartPage = [NSString stringWithFormat:@"http://localhost:%ld", port];
-    if (![expectedStartPage isEqualToString:vc.startPage]) {
-        NSString* error = [NSString stringWithFormat:@"ERROR: <content> tag src in config.xml is incorrect. Expected src of '%@' but actual src of '%@'",  expectedStartPage, vc.startPage ];
-        [self.server logError:@"%@", error];
+    NSURL* startPageUrl = [NSURL URLWithString:vc.startPage];
+    if (startPageUrl != nil) {
+        if ([[startPageUrl scheme] isEqualToString:@"http"] && [[startPageUrl host] isEqualToString:@"localhost"]) {
+            port = [[startPageUrl port] unsignedIntegerValue];
+            useLocalWebServer = YES;
+        }
+    }
+    
+    if (useLocalWebServer) {
+        // Create server
+        self.server = [[GCDWebServer alloc] init];
+        NSString* path = [self.commandDelegate pathForResource:indexPage];
+        
+        [self.server addGETHandlerForBasePath:@"/" directoryPath:[path stringByDeletingLastPathComponent] indexFilename:@"index.html" cacheAge:0 allowRangeRequests:YES];
+        [self.server startWithPort:port bonjourName:nil];
+        [GCDWebServer setLogLevel:kGCDWebServerLogLevel_Error];
+    } else {
+        NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
     }
 }
 
