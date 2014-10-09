@@ -17,7 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<plugin id="io.shaz.plugin.cordova-local-webserver" version="2.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="io.shaz.plugin.cordova-local-webserver" version="2.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>CordovaLocalWebServer</name>
     <description>Cordova Local Web Server Plugin</description>
     <keywords>cordova,local web server</keywords>
