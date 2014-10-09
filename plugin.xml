@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+<plugin id="io.shaz.plugin.cordova-local-webserver" version="1.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>CordovaLocalWebServer</name>
+    
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+		    <feature name="CordovaLocalWebServer">
+			    <param name="ios-package" value="SACordovaLocalWebServer"/>
+			    <param name="onload" value="true"/>
+		    </feature>
+            <preference name="CordovaLocalWebServerPort" value="64000" />
+        </config-file>
+
+	    <header-file src="src/ios/SACordovaLocalWebServer.h" />
+	    <source-file src="src/ios/SACordovaLocalWebServer.m" />
+        
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServer.h" />
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServerConnection.h" />
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServerFunctions.h" />
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServerHTTPStatusCodes.h" />
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServerPrivate.h" />
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServerRequest.h" />
+	    <header-file src="src/ios/GCDWebServer/Core/GCDWebServerResponse.h" />
+	    <source-file src="src/ios/GCDWebServer/Core/GCDWebServer.m" />
+	    <source-file src="src/ios/GCDWebServer/Core/GCDWebServerConnection.m" />
+	    <source-file src="src/ios/GCDWebServer/Core/GCDWebServerFunctions.m" />
+	    <source-file src="src/ios/GCDWebServer/Core/GCDWebServerRequest.m" />
+	    <source-file src="src/ios/GCDWebServer/Core/GCDWebServerResponse.m" />
+        
+	    <header-file src="src/ios/GCDWebServer/Requests/GCDWebServerDataRequest.h" />
+	    <header-file src="src/ios/GCDWebServer/Requests/GCDWebServerFileRequest.h" />
+	    <header-file src="src/ios/GCDWebServer/Requests/GCDWebServerMultiPartFormRequest.h" />
+	    <header-file src="src/ios/GCDWebServer/Requests/GCDWebServerURLEncodedFormRequest.h" />
+	    <source-file src="src/ios/GCDWebServer/Requests/GCDWebServerDataRequest.m" />
+	    <source-file src="src/ios/GCDWebServer/Requests/GCDWebServerFileRequest.m" />
+	    <source-file src="src/ios/GCDWebServer/Requests/GCDWebServerMultiPartFormRequest.m" />
+	    <source-file src="src/ios/GCDWebServer/Requests/GCDWebServerURLEncodedFormRequest.m" />
+
+	    <header-file src="src/ios/GCDWebServer/Responses/GCDWebServerDataResponse.h" />
+	    <header-file src="src/ios/GCDWebServer/Responses/GCDWebServerErrorResponse.h" />
+	    <header-file src="src/ios/GCDWebServer/Responses/GCDWebServerFileResponse.h" />
+	    <header-file src="src/ios/GCDWebServer/Responses/GCDWebServerStreamedResponse.h" />
+	    <source-file src="src/ios/GCDWebServer/Responses/GCDWebServerDataResponse.m" />
+	    <source-file src="src/ios/GCDWebServer/Responses/GCDWebServerErrorResponse.m" />
+	    <source-file src="src/ios/GCDWebServer/Responses/GCDWebServerFileResponse.m" />
+	    <source-file src="src/ios/GCDWebServer/Responses/GCDWebServerStreamedResponse.m" />
+
+	    <framework src="MobileCoreServices.framework" />
+	    <framework src="CFNetwork.framework" />
+        <framework src="libz.dylib" />
+        
+        <info>
+        Modify your content tag in config.xml: &lt;content src="http:=//localhost:64000" /&gt;
+        </info>
+
+    </platform> 
+</plugin>
