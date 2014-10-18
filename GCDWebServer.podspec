@@ -7,7 +7,7 @@
 
 Pod::Spec.new do |s|
   s.name     = 'GCDWebServer'
-  s.version  = '2.5.3'
+  s.version  = '3.1'
   s.author   =  { 'Pierre-Olivier Latour' => 'info@pol-online.net' }
   s.license  = { :type => 'BSD', :file => 'LICENSE' }
   s.homepage = 'https://github.com/swisspol/GCDWebServer'
@@ -28,7 +28,6 @@ Pod::Spec.new do |s|
     cs.ios.frameworks = 'MobileCoreServices', 'CFNetwork'
     cs.osx.library = 'z'
     cs.osx.framework = 'SystemConfiguration'
-    cs.compiler_flags = '-DNDEBUG'  # TODO: Only set this for Release configuration
   end
   
   s.subspec 'WebDAV' do |cs|

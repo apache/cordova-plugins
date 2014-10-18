@@ -25,14 +25,29 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "GCDWebServerStreamedResponse.h"
+#import "GCDWebServerResponse.h"
 
 /**
- *  The GCDWebServerStreamingBlock is called to stream the data for the HTTP body.
+ *  The GCDWebServerStreamBlock is called to stream the data for the HTTP body.
  *  The block must return empty NSData when done or nil on error and set the
  *  "error" argument which is guaranteed to be non-NULL.
  */
-typedef NSData* (^GCDWebServerStreamingBlock)(NSError** error);
+typedef NSData* (^GCDWebServerStreamBlock)(NSError** error);
+
+/**
+ *  The GCDWebServerAsyncStreamBlock works like the GCDWebServerStreamBlock
+ *  except the streamed data can be returned at a later time allowing for
+ *  truly asynchronous generation of the data.
+ *
+ *  The block must return empty NSData when done or nil on error and set the
+ *  "error" argument which is guaranteed to be non-NULL.
+ *
+ *  The block must regularly call "completionBlock" passing new streamed data.
+ *  Eventually it must call "completionBlock" passing an empty NSData indicating
+ *  the end of the stream has been reached, or pass nil and an NSError in case of
+ *  error.
+ */
+typedef void (^GCDWebServerAsyncStreamBlock)(GCDWebServerBodyReaderCompletionBlock completionBlock);
 
 /**
  *  The GCDWebServerStreamedResponse subclass of GCDWebServerResponse streams
@@ -43,11 +58,21 @@ typedef NSData* (^GCDWebServerStreamingBlock)(NSError** error);
 /**
  *  Creates a response with streamed data and a given content type.
  */
-+ (instancetype)responseWithContentType:(NSString*)type streamBlock:(GCDWebServerStreamingBlock)block;
++ (instancetype)responseWithContentType:(NSString*)type streamBlock:(GCDWebServerStreamBlock)block;
+
+/**
+ *  Creates a response with async streamed data and a given content type.
+ */
++ (instancetype)responseWithContentType:(NSString*)type asyncStreamBlock:(GCDWebServerAsyncStreamBlock)block;
+
+/**
+ *  Initializes a response with streamed data and a given content type.
+ */
+- (instancetype)initWithContentType:(NSString*)type streamBlock:(GCDWebServerStreamBlock)block;
 
 /**
  *  This method is the designated initializer for the class.
  */
-- (instancetype)initWithContentType:(NSString*)type streamBlock:(GCDWebServerStreamingBlock)block;
+- (instancetype)initWithContentType:(NSString*)type asyncStreamBlock:(GCDWebServerAsyncStreamBlock)block;
 
 @end
