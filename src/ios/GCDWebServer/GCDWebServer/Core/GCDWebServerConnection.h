@@ -49,6 +49,11 @@
 @property(nonatomic, readonly) GCDWebServer* server;
 
 /**
+ *  Returns YES if the connection is using IPv6.
+ */
+@property(nonatomic, readonly, getter=isUsingIPv6) BOOL usingIPv6;
+
+/**
  *  Returns the address of the local peer (i.e. server) of the connection
  *  as a raw "struct sockaddr".
  */
@@ -56,7 +61,7 @@
 
 /**
  *  Returns the address of the local peer (i.e. server) of the connection
- *  as a dotted string.
+ *  as a string.
  */
 @property(nonatomic, readonly) NSString* localAddressString;
 
@@ -68,7 +73,7 @@
 
 /**
  *  Returns the address of the remote peer (i.e. client) of the connection
- *  as a dotted string.
+ *  as a string.
  */
 @property(nonatomic, readonly) NSString* remoteAddressString;
 
@@ -138,13 +143,14 @@
 
 /**
  *  Assuming a valid HTTP request was received and -preflightRequest: returned nil,
- *  this method is called to process the request.
+ *  this method is called to process the request by executing the handler's
+ *  process block.
  */
-- (GCDWebServerResponse*)processRequest:(GCDWebServerRequest*)request withBlock:(GCDWebServerProcessBlock)block;
+- (void)processRequest:(GCDWebServerRequest*)request completion:(GCDWebServerCompletionBlock)completion;
 
 /**
  *  Assuming a valid HTTP request was received and either -preflightRequest:
- *  or -processRequest:withBlock: returned a non-nil GCDWebServerResponse,
+ *  or -processRequest:completion: returned a non-nil GCDWebServerResponse,
  *  this method is called to override the response.
  *
  *  You can either modify the current response and return it, or return a
