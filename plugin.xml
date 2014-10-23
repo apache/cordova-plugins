@@ -24,7 +24,7 @@
     <repo>https://github.com/shazron/CordovaLocalWebServer.git</repo>
 
     <engines>
-        <engine name="cordova" version=">=3.0.0" />
+        <engine name="cordova" version=">=3.7.0" />
     </engines>
     
     <!-- ios -->
@@ -76,6 +76,7 @@
         
         <info>
         Modify your content tag in config.xml to point to a http://localhost location, change the port to whatever you want, e.g. &lt;content src="http:=//localhost:8088" /&gt;
+        Set the port to "0" to get a randomized port.
         </info>
 
     </platform> 
