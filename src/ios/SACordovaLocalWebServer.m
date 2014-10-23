@@ -19,6 +19,7 @@
  */
 
 #import "SACordovaLocalWebServer.h"
+#import "GCDWebServerPrivate.h"
 #import <Cordova/CDVViewController.h>
 
 @implementation SACordovaLocalWebServer
@@ -46,7 +47,7 @@
         
         [self.server addGETHandlerForBasePath:@"/" directoryPath:[path stringByDeletingLastPathComponent] indexFilename:@"index.html" cacheAge:0 allowRangeRequests:YES];
         [self.server startWithPort:port bonjourName:nil];
-        [GCDWebServer setLogLevel:kGCDWebServerLogLevel_Error];
+        [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
     } else {
         NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
     }
