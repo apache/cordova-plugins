@@ -7,16 +7,15 @@ After installing the plugin, change the `src` attribute of your `<content>` tag 
         <!-- port can be whatever you want -->
         <content src="http://localhost:8088" />
     
-For the local web server to start, the url **must** be http://localhost, and you can set the port to whatever you want in the url, the local web server will use this as the port automatically.
+For the local web server to start, the url **must** be http://localhost, and you can set the port to whatever you want in the url, the local web server will use this as the port automatically. `If you set the port to "0", it will select a randomized and free port.`
     
 Check your console log for errors in configuration. 
 
 ## Security Caveats
 
-1. Any backgrounded app can potentially access this local web server when your app is running.
-2. There may be port collisions for the local web server.
+    Any backgrounded app can potentially access this local web server when your app is running.
 
-Points 1 and 2 can be solved by an enhancement to the cordova-ios source. This plugin is compatible with all 3.x releases of Cordova.
+This plugin is only compatible with the 3.7.0 release of cordova-ios, or greater.
     
 
 ## Credits
