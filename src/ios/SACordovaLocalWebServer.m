@@ -50,7 +50,7 @@
         [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
         
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
-		vc.startPage = [NSString stringWithFormat:@"http://localhost:%d/", self.server.port];
+		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/", self.server.port];
         
     } else {
         NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
