@@ -38,6 +38,9 @@
 
 	    <header-file src="src/ios/SACordovaLocalWebServer.h" />
 	    <source-file src="src/ios/SACordovaLocalWebServer.m" />
+	    
+	    <header-file src="src/ios/GCDWebServer+LocalhostOnlyBaseHandler.h" />
+	    <source-file src="src/ios/GCDWebServer+LocalhostOnlyBaseHandler.m" />
         
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServer.h" />
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerConnection.h" />
