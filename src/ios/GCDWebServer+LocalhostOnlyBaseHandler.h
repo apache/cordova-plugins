@@ -21,6 +21,6 @@
 
 @interface GCDWebServer (LocalhostOnlyBaseHandler)
 
-- (void)addLocalhostOnlyGETHandlerForBasePath:(NSString*)basePath directoryPath:(NSString*)directoryPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge allowRangeRequests:(BOOL)allowRangeRequests;
+- (void)addLocalhostOnlyGETHandlerForBasePath:(NSString*)basePath directoryPath:(NSString*)directoryPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge allowRangeRequests:(BOOL)allowRangeRequests authToken:(NSString*)authToken;
 
 @end

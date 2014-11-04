@@ -26,8 +26,11 @@
 
 @implementation GCDWebServer (LocalhostOnlyBaseHandler)
 
-- (void)addLocalhostOnlyGETHandlerForBasePath:(NSString*)basePath directoryPath:(NSString*)directoryPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge allowRangeRequests:(BOOL)allowRangeRequests {
+NSString* _authTokenKV = nil;
+
+- (void)addLocalhostOnlyGETHandlerForBasePath:(NSString*)basePath directoryPath:(NSString*)directoryPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge allowRangeRequests:(BOOL)allowRangeRequests authToken:(NSString *)authToken {
 	if ([basePath hasPrefix:@"/"] && [basePath hasSuffix:@"/"]) {
+		_authTokenKV = authToken;
 		GCDWebServer* __unsafe_unretained server = self;
 		[self addHandlerWithMatchBlock:^GCDWebServerRequest *(NSString* requestMethod, NSURL* requestURL, NSDictionary* requestHeaders, NSString* urlPath, NSDictionary* urlQuery) {
 			
@@ -44,6 +47,14 @@
 			//check if it is a request from localhost
 			NSString *host = [request.headers objectForKey:@"Host"];
 			if (host==nil || [host hasPrefix:@"localhost"] == NO ) {
+				return [GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden message:@"FORBIDDEN"];
+			}
+			
+			//check if the querystring or the cookie has the token
+			BOOL hasToken = (request.URL.query && [request.URL.query containsString:_authTokenKV]);
+			NSString *cookie = [request.headers objectForKey:@"Cookie"];
+			BOOL hasCookie = (cookie && [cookie containsString:_authTokenKV]);
+			if (!hasToken && !hasCookie) {
 				return [GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden message:@"FORBIDDEN"];
 			}
 			
@@ -74,6 +85,12 @@
 			} else {
 				response = [GCDWebServerResponse responseWithStatusCode:kGCDWebServerHTTPStatusCode_NotFound];
 			}
+			
+			if (hasToken && !hasCookie) {
+				//set cookie
+				[response setValue:_authTokenKV forAdditionalHeader:@"Set-Cookie"];
+			}
+			
 			return response;
 			
 		}];
