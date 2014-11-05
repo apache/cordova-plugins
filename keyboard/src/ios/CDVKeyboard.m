@@ -203,46 +203,79 @@
 
 // //////////////////////////////////////////////////
 
+- (NSArray*)getKeyboardViews:(UIView*)viewToSearch{
+    NSArray *subViews;
+    
+    for (UIView *possibleFormView in viewToSearch.subviews) {
+        if ([[possibleFormView description] hasPrefix: self.getKeyboardFirstLevelIdentifier]) {
+            if(IsAtLeastiOSVersion(@"8.0")){
+                for (UIView* subView in possibleFormView.subviews) {
+                    return subView.subviews;
+                }
+            }else{
+                return possibleFormView.subviews;
+            }
+        }
+        
+    }
+    return subViews;
+}
+
+- (NSString*)getKeyboardFirstLevelIdentifier{
+    if(!IsAtLeastiOSVersion(@"8.0")){
+        return @"<UIPeripheralHostView";
+    }else{
+        return @"<UIInputSetContainerView";
+    }
+}
+
+
 - (void)formAccessoryBarKeyboardWillShow:(NSNotification*)notif
 {
     if (!_hideFormAccessoryBar) {
         return;
     }
 
-    NSArray* windows = [[UIApplication sharedApplication] windows];
-
-    for (UIWindow* window in windows) {
-        for (UIView* view in window.subviews) {
-            if ([[view description] hasPrefix:@"<UIPeripheralHostView"]) {
-                for (UIView* peripheralView in view.subviews) {
-                    // hides the backdrop (iOS 7)
-                    if ([[peripheralView description] hasPrefix:@"<UIKBInputBackdropView"]) {
-                        // check that this backdrop is for the accessory bar (at the top),
-                        // sparing the backdrop behind the main keyboard
-                        CGRect rect = peripheralView.frame;
-                        if (rect.origin.y == 0) {
-                            [[peripheralView layer] setOpacity:0.0];
-                        }
-                    }
-
-                    // hides the accessory bar
-                    if ([[peripheralView description] hasPrefix:@"<UIWebFormAccessory"]) {
-                        // remove the extra scroll space for the form accessory bar
-                        CGRect newFrame = self.webView.scrollView.frame;
-                        newFrame.size.height += peripheralView.frame.size.height;
-                        self.webView.scrollView.frame = newFrame;
-
-                        _accessoryBarHeight = peripheralView.frame.size.height;
-
-                        // remove the form accessory bar
-                        [peripheralView removeFromSuperview];
-                    }
-                    // hides the thin grey line used to adorn the bar (iOS 6)
-                    if ([[peripheralView description] hasPrefix:@"<UIImageView"]) {
-                        [[peripheralView layer] setOpacity:0.0];
-                    }
-                }
+    UIWindow *keyboardWindow = nil;
+    for (UIWindow *windows in [[UIApplication sharedApplication] windows]) {
+        if (![[windows class] isEqual:[UIWindow class]]) {
+            keyboardWindow = windows;
+            break;
+        }
+    }
+    
+    for (UIView* peripheralView in [self getKeyboardViews:keyboardWindow]) {
+        
+        // hides the backdrop (iOS 7)
+        if ([[peripheralView description] hasPrefix:@"<UIKBInputBackdropView"]) {
+            // check that this backdrop is for the accessory bar (at the top),
+            // sparing the backdrop behind the main keyboard
+            CGRect rect = peripheralView.frame;
+            if (rect.origin.y == 0) {
+                [[peripheralView layer] setOpacity:0.0];
             }
+        }
+        
+        // hides the accessory bar
+        if ([[peripheralView description] hasPrefix:@"<UIWebFormAccessory"]) {
+            //remove the extra scroll space for the form accessory bar
+            CGRect newFrame = self.webView.scrollView.frame;
+            newFrame.size.height += peripheralView.frame.size.height;
+            self.webView.scrollView.frame = newFrame;
+            
+            _accessoryBarHeight = peripheralView.frame.size.height;
+            
+            // remove the form accessory bar
+            if(IsAtLeastiOSVersion(@"8.0")){
+                [[peripheralView layer] setOpacity:0.0];
+            }else{
+                [peripheralView removeFromSuperview];
+            }
+            
+        }
+        // hides the thin grey line used to adorn the bar (iOS 6)
+        if ([[peripheralView description] hasPrefix:@"<UIImageView"]) {
+            [[peripheralView layer] setOpacity:0.0];
         }
     }
 }
