@@ -230,7 +230,8 @@
                         // remove the extra scroll space for the form accessory bar
                         CGRect newFrame = self.webView.scrollView.frame;
                         newFrame.size.height += peripheralView.frame.size.height;
-                        self.webView.scrollView.frame = newFrame;
+                        // Commented out to resolve this issue: https://issues.apache.org/jira/browse/CB-5717
+                        //self.webView.scrollView.frame = newFrame;
 
                         _accessoryBarHeight = peripheralView.frame.size.height;
 
