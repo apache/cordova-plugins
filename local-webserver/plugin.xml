@@ -22,6 +22,9 @@
     <description>Cordova Local Web Server Plugin</description>
     <keywords>cordova,local web server</keywords>
     <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugins.git</repo>
+    
+    <hook type="after_plugin_install" src="scripts/after_install.js" />
+    <hook type="before_plugin_uninstall" src="scripts/before_uninstall.js" />
 
     <engines>
         <engine name="cordova" version=">=3.7.0" />
@@ -29,6 +32,7 @@
     
     <!-- ios -->
     <platform name="ios">
+        
         <config-file target="config.xml" parent="/*">
 		    <feature name="CordovaLocalWebServer">
 			    <param name="ios-package" value="SACordovaLocalWebServer"/>
@@ -78,9 +82,8 @@
         <framework src="libz.dylib" />
         
         <info>
-        Modify your content tag in config.xml to point to a http://localhost location, change the port to whatever you want, e.g. &lt;content src="http:=//localhost:8088" /&gt;
-        Set the port to "0" to get a randomized port.
-        </info>
+        Your content tag in config.xml now points to a http://localhost:0 location (randomized port), e.g. &lt;content src="http://localhost:0" /&gt;
+    </info>
 
     </platform> 
 </plugin>
