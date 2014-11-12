@@ -20,7 +20,7 @@
 #import <Cordova/CDVPlugin.h>
 #import "GCDWebServer.h"
 
-@interface SACordovaLocalWebServer : CDVPlugin
+@interface CDVLocalWebServer : CDVPlugin
 
 @property (nonatomic, strong) GCDWebServer* server;
 @end

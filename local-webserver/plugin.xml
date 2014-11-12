@@ -41,8 +41,8 @@
             <preference name="CordovaLocalWebServerStartOnSimulator" value="true" />
         </config-file>
 
-	    <header-file src="src/ios/SACordovaLocalWebServer.h" />
-	    <source-file src="src/ios/SACordovaLocalWebServer.m" />
+	    <header-file src="src/ios/CDVLocalWebServer.h" />
+	    <source-file src="src/ios/CDVLocalWebServer.m" />
 	    
 	    <header-file src="src/ios/GCDWebServer+LocalhostOnlyBaseHandler.h" />
 	    <source-file src="src/ios/GCDWebServer+LocalhostOnlyBaseHandler.m" />

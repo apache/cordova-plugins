@@ -17,12 +17,12 @@
  under the License.
  */
 
-#import "SACordovaLocalWebServer.h"
+#import "CDVLocalWebServer.h"
 #import "GCDWebServerPrivate.h"
 #import "GCDWebServer+LocalhostOnlyBaseHandler.h"
 #import <Cordova/CDVViewController.h>
 
-@implementation SACordovaLocalWebServer
+@implementation CDVLocalWebServer
 
 - (void) pluginInitialize {
 
