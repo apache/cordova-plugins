@@ -38,6 +38,7 @@
 			    <param name="ios-package" value="SACordovaLocalWebServer"/>
 			    <param name="onload" value="true"/>
 		    </feature>
+            <preference name="CordovaLocalWebServerStartOnSimulator" value="true" />
         </config-file>
 
 	    <header-file src="src/ios/SACordovaLocalWebServer.h" />

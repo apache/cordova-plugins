@@ -25,11 +25,11 @@
 @implementation SACordovaLocalWebServer
 
 - (void) pluginInitialize {
-	
+
     BOOL useLocalWebServer = NO;
     NSString* indexPage = @"index.html";
     NSUInteger port = 80;
-	
+
     // check the content tag src
     CDVViewController* vc = (CDVViewController*)self.viewController;
     NSURL* startPageUrl = [NSURL URLWithString:vc.startPage];
@@ -39,6 +39,16 @@
             useLocalWebServer = YES;
         }
     }
+    
+    // check setting
+#if TARGET_IPHONE_SIMULATOR
+    if (useLocalWebServer) {
+        NSNumber* startOnSimulatorSetting = [[self.commandDelegate settings] objectForKey:[@"CordovaLocalWebServerStartOnSimulator" lowercaseString]];
+        if (startOnSimulatorSetting) {
+            useLocalWebServer = [startOnSimulatorSetting boolValue];
+        }
+    }
+#endif
     
     if (useLocalWebServer) {
 		// Create server
