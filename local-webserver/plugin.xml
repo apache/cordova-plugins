@@ -35,7 +35,7 @@
         
         <config-file target="config.xml" parent="/*">
 		    <feature name="CordovaLocalWebServer">
-			    <param name="ios-package" value="SACordovaLocalWebServer"/>
+			    <param name="ios-package" value="CDVLocalWebServer"/>
 			    <param name="onload" value="true"/>
 		    </feature>
             <preference name="CordovaLocalWebServerStartOnSimulator" value="true" />
