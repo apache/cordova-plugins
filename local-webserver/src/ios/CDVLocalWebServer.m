@@ -28,7 +28,7 @@
 
     BOOL useLocalWebServer = NO;
     NSString* indexPage = @"index.html";
-    NSString* subPath = @"app";
+    NSString* subPath = @"www";
     NSUInteger port = 80;
 
     // check the content tag src
