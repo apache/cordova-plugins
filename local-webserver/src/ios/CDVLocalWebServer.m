@@ -28,6 +28,7 @@
 
     BOOL useLocalWebServer = NO;
     NSString* indexPage = @"index.html";
+    NSString* subPath = @"app";
     NSUInteger port = 80;
 
     // check the content tag src
@@ -55,12 +56,13 @@
         self.server = [[GCDWebServer alloc] init];
         NSString* path = [self.commandDelegate pathForResource:indexPage];
 		NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
-		[self.server addLocalhostOnlyGETHandlerForBasePath:@"/" directoryPath:[path stringByDeletingLastPathComponent] indexFilename:indexPage cacheAge:0 allowRangeRequests:YES authToken:authToken];
+        NSString* appPath = [NSString stringWithFormat:@"/%@/", subPath];
+		[self.server addLocalhostOnlyGETHandlerForBasePath:appPath directoryPath:[path stringByDeletingLastPathComponent] indexFilename:indexPage cacheAge:0 allowRangeRequests:YES authToken:authToken];
         [self.server startWithPort:port bonjourName:nil];
         [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
         
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
-		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@?%@", self.server.port, indexPage, authToken];
+		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", self.server.port, subPath, indexPage, authToken];
         
     } else {
         NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
