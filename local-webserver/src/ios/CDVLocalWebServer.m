@@ -21,6 +21,8 @@
 #import "GCDWebServerPrivate.h"
 #import "GCDWebServer+LocalhostOnlyBaseHandler.h"
 #import <Cordova/CDVViewController.h>
+#import "CDVLocalFileSystem+NativeURL.h"
+#import "CDVAssetLibraryFileSystem+NativeURL.h"
 
 @implementation CDVLocalWebServer
 
@@ -50,7 +52,6 @@
         }
     }
 #endif
-    
     if (useLocalWebServer) {
 		// Create server
         self.server = [[GCDWebServer alloc] init];
@@ -58,8 +59,11 @@
 		NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
         NSString* appPath = [NSString stringWithFormat:@"/%@/", subPath];
 		[self.server addLocalhostOnlyGETHandlerForBasePath:appPath directoryPath:[path stringByDeletingLastPathComponent] indexFilename:indexPage cacheAge:0 allowRangeRequests:YES authToken:authToken];
+        
         [self.server startWithPort:port bonjourName:nil];
         [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
+        
+        [self addFileSystemHandlers];
         
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
 		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", self.server.port, subPath, indexPage, authToken];
@@ -67,6 +71,44 @@
     } else {
         NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
     }
+}
+
+-  (void) addFileSystemHandlers
+{
+    [self addLocalFileSystemHandler];
+    [self addAssetLibraryFileSystemHandler];
+    
+    CDVFile* filePlugin = (CDVFile*)[self.commandDelegate getCommandInstance:@"File"];
+    NSURL* localServerURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:%lu", self.server.port]];
+    
+    // set the localWebServerURL for the Obj-C categories
+    if (filePlugin) {
+        NSArray* fileSystems = filePlugin.fileSystems;
+        for (NSObject<CDVFileSystem>* fileSystem in fileSystems) {
+            SEL sel = NSSelectorFromString(@"setLocalWebServerURL:");
+            if ([fileSystem respondsToSelector:sel]) {
+                ((void (*)(id, SEL, id))[fileSystem methodForSelector:sel])(fileSystem, sel, localServerURL);
+            }
+        }
+    }
+}
+
+- (void) addLocalFileSystemHandler
+{
+    // TODO:
+    // add the GCD GET handler
+    // extract the path after /local-filesystem/
+    // convert to file URL
+    // stream the file back
+}
+
+- (void) addAssetLibraryFileSystemHandler
+{
+    // TODO:
+    // add the GCD GET handler
+    // extract the path after /asset-library/ prepend "assets-library:/"
+    // use ALAssetsLibrary assetForURL
+    // stream the file back
 }
 
 @end

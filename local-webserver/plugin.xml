@@ -25,6 +25,8 @@
     
     <hook type="after_plugin_install" src="scripts/after_install.js" />
     <hook type="before_plugin_uninstall" src="scripts/before_uninstall.js" />
+    
+    <dependency id="org.apache.cordova.file" version=">=1.0.1" />
 
     <engines>
         <engine name="cordova" version=">=3.7.0" />
@@ -43,6 +45,11 @@
 
 	    <header-file src="src/ios/CDVLocalWebServer.h" />
 	    <source-file src="src/ios/CDVLocalWebServer.m" />
+
+	    <header-file src="src/ios/CDVAssetLibraryFileSystem+NativeURL.h" />
+	    <source-file src="src/ios/CDVAssetLibraryFileSystem+NativeURL.m" />
+	    <header-file src="src/ios/CDVLocalFileSystem+NativeURL.h" />
+	    <source-file src="src/ios/CDVLocalFileSystem+NativeURL.m" />
 	    
 	    <header-file src="src/ios/GCDWebServer+LocalhostOnlyBaseHandler.h" />
 	    <source-file src="src/ios/GCDWebServer+LocalhostOnlyBaseHandler.m" />
