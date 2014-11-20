@@ -167,11 +167,11 @@
     if (!IsAtLeastiOSVersion(@"7.0")) {
         if (ashrinkView) {
             [nc removeObserver:_shrinkViewKeyboardShowObserver];
-            _shrinkViewKeyboardShowObserver = [nc addObserverForName:UIKeyboardWillShowNotification
+            _shrinkViewKeyboardShowObserver = [nc addObserverForName:UIKeyboardDidShowNotification
                                                               object:nil
                                                                queue:[NSOperationQueue mainQueue]
                                                           usingBlock:^(NSNotification* notification) {
-                    [weakSelf performSelector:@selector(shrinkViewKeyboardWillShow:) withObject:notification afterDelay:0];
+                    [weakSelf performSelector:@selector(shrinkViewKeyboardDidShow:) withObject:notification afterDelay:0];
                 }];
 
             [nc removeObserver:_shrinkViewKeyboardHideObserver];
@@ -215,24 +215,26 @@
         for (UIView* view in window.subviews) {
             if ([[view description] hasPrefix:@"<UIPeripheralHostView"]) {
                 for (UIView* peripheralView in view.subviews) {
-                    // hides the backdrop (iOS 7)
-                    if ([[peripheralView description] hasPrefix:@"<UIKBInputBackdropView"]) {
-                        // check that this backdrop is for the accessory bar (at the top),
-                        // sparing the backdrop behind the main keyboard
-                        CGRect rect = peripheralView.frame;
-                        if (rect.origin.y == 0) {
-                            [[peripheralView layer] setOpacity:0.0];
-                        }
-                    }
+                    // reposition the subviews
+                    CGRect r = peripheralView.frame;
+                    r.origin.y = 0;
+                    peripheralView.frame = r;
 
                     // hides the accessory bar
                     if ([[peripheralView description] hasPrefix:@"<UIWebFormAccessory"]) {
-                        // remove the extra scroll space for the form accessory bar
-                        CGRect newFrame = self.webView.scrollView.frame;
-                        newFrame.size.height += peripheralView.frame.size.height;
-                        self.webView.scrollView.frame = newFrame;
-
+                        // save the height
                         _accessoryBarHeight = peripheralView.frame.size.height;
+
+                        // reposition keyboard container
+                        CGRect r = view.frame;
+                        r.origin.y += _accessoryBarHeight;
+                        // resize keyboard container
+                        r.size.height -= _accessoryBarHeight;
+                        view.frame = r;
+                        // recenter keyboard container
+                        CGPoint c = view.center;
+                        c.y += _accessoryBarHeight / 2;
+                        view.center = c;
 
                         // remove the form accessory bar
                         [peripheralView removeFromSuperview];
@@ -242,6 +244,11 @@
                         [[peripheralView layer] setOpacity:0.0];
                     }
                 }
+                
+                // increase size of web view scroll view
+                CGRect newFrame = self.webView.scrollView.frame;
+                newFrame.size.height += _accessoryBarHeight;
+                self.webView.scrollView.frame = newFrame;
             }
         }
     }
@@ -255,7 +262,7 @@
 
 // //////////////////////////////////////////////////
 
-- (void)shrinkViewKeyboardWillShow:(NSNotification*)notif
+- (void)shrinkViewKeyboardDidShow:(NSNotification*)notif
 {
     if (!_shrinkView) {
         return;
