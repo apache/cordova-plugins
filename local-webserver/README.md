@@ -14,8 +14,7 @@ Check your console log for errors in configuration.
 
     In order to limit access to your app, requests are restricted to localhost and are protected with an auth token.
     This should effectively restrict access to the server to your app.
-    However, since requests are made over http, your app's activity may be visible to others on the name wi-fi network.
-
+    
 This plugin is only compatible with the 3.7.0 release of cordova-ios, or greater.
     
 
