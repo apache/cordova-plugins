@@ -19,12 +19,15 @@
 
 #import "CDVLocalWebServer.h"
 #import "GCDWebServerPrivate.h"
-#import "GCDWebServer+LocalhostOnlyBaseHandler.h"
 #import <Cordova/CDVViewController.h>
 #import "CDVLocalFileSystem+NativeURL.h"
 #import "CDVAssetLibraryFileSystem+NativeURL.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+
+@interface GCDWebServer()
+- (GCDWebServerResponse*)_responseWithContentsOfDirectory:(NSString*)path;
+@end
 
 @implementation CDVLocalWebServer
 
@@ -32,7 +35,7 @@
 
     BOOL useLocalWebServer = NO;
     NSString* indexPage = @"index.html";
-    NSString* subPath = @"www";
+    NSString* appBasePath = @"www";
     NSUInteger port = 80;
 
     // check the content tag src
@@ -57,18 +60,16 @@
     if (useLocalWebServer) {
 		// Create server
         self.server = [[GCDWebServer alloc] init];
-        NSString* path = [self.commandDelegate pathForResource:indexPage];
 		NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
-        NSString* appPath = [NSString stringWithFormat:@"/%@/", subPath];
-		[self.server addLocalhostOnlyGETHandlerForBasePath:appPath directoryPath:[path stringByDeletingLastPathComponent] indexFilename:indexPage cacheAge:0 allowRangeRequests:YES authToken:authToken];
+        
+        [self addAppFileSystemHandler:authToken basePath:[NSString stringWithFormat:@"/%@/", appBasePath] indexPage:indexPage];
+        [self addFileSystemHandlers:authToken];
         
         [self.server startWithPort:port bonjourName:nil];
         [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
         
-        [self addFileSystemHandlers:authToken];
-        
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
-		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, subPath, indexPage, authToken];
+		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
         
     } else {
         NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
@@ -140,6 +141,45 @@
     };
     
     [self.server addHandlerWithMatchBlock:matchBlock asyncProcessBlock:asyncProcessBlock];
+}
+
+- (void) addAppFileSystemHandler:(NSString*)authToken basePath:(NSString*)basePath indexPage:(NSString*)indexPage
+{
+    BOOL allowRangeRequests = YES;
+    
+    NSString* directoryPath = [[self.commandDelegate pathForResource:indexPage] stringByDeletingLastPathComponent];
+;
+    
+    GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
+        
+        NSString* filePath = [directoryPath stringByAppendingPathComponent:[request.path substringFromIndex:basePath.length]];
+        NSString* fileType = [[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:NULL] fileType];
+        GCDWebServerResponse* response = nil;
+
+        if (fileType) {
+            if ([fileType isEqualToString:NSFileTypeDirectory]) {
+                if (indexPage) {
+                    NSString* indexPath = [filePath stringByAppendingPathComponent:indexPage];
+                    NSString* indexType = [[[NSFileManager defaultManager] attributesOfItemAtPath:indexPath error:NULL] fileType];
+                    if ([indexType isEqualToString:NSFileTypeRegular]) {
+                        complete([GCDWebServerFileResponse responseWithFile:indexPath]);
+                    }
+                }
+                response = [self.server _responseWithContentsOfDirectory:filePath];
+            } else if ([fileType isEqualToString:NSFileTypeRegular]) {
+                if (allowRangeRequests) {
+                    response = [GCDWebServerFileResponse responseWithFile:filePath byteRange:request.byteRange];
+                    [response setValue:@"bytes" forAdditionalHeader:@"Accept-Ranges"];
+                } else {
+                    response = [GCDWebServerFileResponse responseWithFile:filePath];
+                }
+            }
+        }
+        
+        complete(response);
+    };
+    
+    [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
 }
 
 - (void) addLocalFileSystemHandler:(NSString*)authToken
