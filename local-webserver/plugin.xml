@@ -85,6 +85,7 @@
 	    <source-file src="src/ios/GCDWebServer/GCDWebServer/Responses/GCDWebServerFileResponse.m" />
 	    <source-file src="src/ios/GCDWebServer/GCDWebServer/Responses/GCDWebServerStreamedResponse.m" />
 
+	    <framework src="AssetsLibrary.framework" />
 	    <framework src="MobileCoreServices.framework" />
 	    <framework src="CFNetwork.framework" />
         <framework src="libz.dylib" />
