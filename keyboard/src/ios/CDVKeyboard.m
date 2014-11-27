@@ -349,7 +349,7 @@
 
 // //////////////////////////////////////////////////
 
-#pragma Plugin interface
+#pragma mark Plugin interface
 
 - (void) shrinkView:(CDVInvokedUrlCommand*)command
 {
