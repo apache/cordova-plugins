@@ -20,10 +20,13 @@
 #import "CDVLocalWebServer.h"
 #import "GCDWebServerPrivate.h"
 #import <Cordova/CDVViewController.h>
-#import "CDVLocalFileSystem+NativeURL.h"
-#import "CDVAssetLibraryFileSystem+NativeURL.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <MobileCoreServices/MobileCoreServices.h>
+#import <objc/message.h>
+
+
+#define LOCAL_FILESYSTEM_PATH   @"local-filesystem"
+#define ASSETS_LIBRARY_PATH     @"assets-library"
 
 @interface GCDWebServer()
 - (GCDWebServerResponse*)_responseWithContentsOfDirectory:(NSString*)path;
@@ -81,18 +84,38 @@
     [self addLocalFileSystemHandler:authToken];
     [self addAssetLibraryFileSystemHandler:authToken];
     
-    CDVFile* filePlugin = (CDVFile*)[self.commandDelegate getCommandInstance:@"File"];
     NSURL* localServerURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:%lu", (unsigned long)self.server.port]];
+
+    SEL sel = NSSelectorFromString(@"setUrlTransformer:");
     
-    // set the localWebServerURL for the Obj-C categories
-    if (filePlugin) {
-        NSArray* fileSystems = filePlugin.fileSystems;
-        for (NSObject<CDVFileSystem>* fileSystem in fileSystems) {
-            SEL sel = NSSelectorFromString(@"setLocalWebServerURL:");
-            if ([fileSystem respondsToSelector:sel]) {
-                ((void (*)(id, SEL, id))[fileSystem methodForSelector:sel])(fileSystem, sel, localServerURL);
+    if ([self.commandDelegate respondsToSelector:sel]) {
+        NSURL* (^urlTransformer)(NSURL*) = ^NSURL* (NSURL* urlToTransform) {
+            NSURL* transformedUrl = urlToTransform;
+            
+            NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", [localServerURL.port unsignedIntegerValue]];
+            
+            if ([[urlToTransform scheme] isEqualToString:ASSETS_LIBRARY_PATH]) {
+                transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@",
+                        localhostUrlString,
+                        ASSETS_LIBRARY_PATH,
+                        urlToTransform.path
+                        ]];
+
+            } else if ([[urlToTransform scheme] isEqualToString:@"file"]) {
+                transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@",
+                       localhostUrlString,
+                        LOCAL_FILESYSTEM_PATH,
+                       urlToTransform.path
+                        ]];
             }
-        }
+            
+            return transformedUrl;
+        };
+        
+        ((void (*)(id, SEL, id))objc_msgSend)(self.commandDelegate, sel, urlTransformer);
+        
+    } else {
+        NSLog(@"WARNING: CDVPlugin's commandDelegate is missing a urlTransformer property. The local web server can't set it to transform file and asset-library urls");
     }
 }
 
@@ -184,7 +207,7 @@
 
 - (void) addLocalFileSystemHandler:(NSString*)authToken
 {
-    NSString* basePath = @"/local-filesystem/";
+    NSString* basePath = [NSString stringWithFormat:@"/%@/", LOCAL_FILESYSTEM_PATH];
     BOOL allowRangeRequests = YES;
     
     GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
@@ -210,7 +233,7 @@
 
 - (void) addAssetLibraryFileSystemHandler:(NSString*)authToken
 {
-    NSString* basePath = @"/asset-library/";
+    NSString* basePath = [NSString stringWithFormat:@"/%@/", ASSETS_LIBRARY_PATH];
     
     GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
         
