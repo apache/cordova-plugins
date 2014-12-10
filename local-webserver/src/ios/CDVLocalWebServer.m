@@ -89,7 +89,7 @@
     SEL sel = NSSelectorFromString(@"setUrlTransformer:");
     
     if ([self.commandDelegate respondsToSelector:sel]) {
-        NSURL* (^urlTransformer)(NSURL*) = ^NSURL* (NSURL* urlToTransform) {
+        UrlTransformerBlock urlTransformer = ^NSURL* (NSURL* urlToTransform) {
             NSURL* transformedUrl = urlToTransform;
             
             NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", [localServerURL.port unsignedIntegerValue]];
