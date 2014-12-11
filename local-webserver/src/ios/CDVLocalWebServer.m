@@ -66,10 +66,12 @@
 		NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
         
         [self addAppFileSystemHandler:authToken basePath:[NSString stringWithFormat:@"/%@/", appBasePath] indexPage:indexPage];
-        [self addFileSystemHandlers:authToken];
         
         [self.server startWithPort:port bonjourName:nil];
         [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
+        
+        // add after server is started to get the true port
+        [self addFileSystemHandlers:authToken];
         
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
 		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
@@ -95,14 +97,15 @@
             NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", [localServerURL.port unsignedIntegerValue]];
             
             if ([[urlToTransform scheme] isEqualToString:ASSETS_LIBRARY_PATH]) {
-                transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@",
+                transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@",
                         localhostUrlString,
                         ASSETS_LIBRARY_PATH,
+                        urlToTransform.host,
                         urlToTransform.path
                         ]];
 
             } else if ([[urlToTransform scheme] isEqualToString:@"file"]) {
-                transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@",
+                transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@%@",
                        localhostUrlString,
                         LOCAL_FILESYSTEM_PATH,
                        urlToTransform.path
