@@ -45,11 +45,6 @@
 
 	    <header-file src="src/ios/CDVLocalWebServer.h" />
 	    <source-file src="src/ios/CDVLocalWebServer.m" />
-
-	    <header-file src="src/ios/CDVAssetLibraryFileSystem+NativeURL.h" />
-	    <source-file src="src/ios/CDVAssetLibraryFileSystem+NativeURL.m" />
-	    <header-file src="src/ios/CDVLocalFileSystem+NativeURL.h" />
-	    <source-file src="src/ios/CDVLocalFileSystem+NativeURL.m" />
 	    
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServer.h" />
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerConnection.h" />
