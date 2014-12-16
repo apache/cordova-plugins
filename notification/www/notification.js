@@ -23,8 +23,10 @@ var argscheck = require('cordova/argscheck'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec');
    
+// counter for a notification id
+var nId = 0;
 
-// This might not be the best option
+// This might not be the best idea
 // from http://stackoverflow.com/questions/22186467/how-to-use-javascript-eventtarget
 
 function Emitter () {
@@ -39,12 +41,17 @@ function Emitter () {
 
 Emitter.methods = ["addEventListener", "dispatchEvent", "removeEventListener"];
 
-function Notification () {
-  Emitter.call(this);
+function CNotification(title, options, successCB, errorCB) {
+    // add emitter methods to Notification
+    Emitter.call(this);
+    this.title = options.title = title;
+    this.notificationId = options.notificationId = nId++;
+    exec(successCB, errorCB, "CNotification", "create", options);
 }
 
-Notifcation.close = function(fields, successCB, errorCB, options) {
-    exec(successCB, errorCB, "Notification", "close", [fields, options]);
+CNotification.close = function(fields, successCB, errorCB, options) {
+    options.notificationId = this.notificationId;
+    exec(successCB, errorCB, "CNotification", "close", [fields, options]);
 };
 
-module.exports = Notification;
+module.exports = CNotification;

@@ -11,18 +11,20 @@
     <keywords>cordova,notification</keywords>
 
 	<engines>
-		<engine name="cordova" version=">=4.0.0" />
+		<engine name="cordova" version=">=3.6.0" />
 	</engines>
 
     <js-module src="www/notification.js" name="notification">
-    	<clobbers target="window.Notification" />
+        <clobbers target="window.CNotification" />
     </js-module>
 
     <!-- firefoxos -->
     <platform name="firefoxos">
-		<permission name="desktop-notification" description="Your reason here">
-        <js-module src="src/firefoxos/NotificationProxy.js" name="NotificationProxy">
-            <runs />
+        <config-file target="config.xml" parent="/*">
+			<permission name="desktop-notification" description="Cordova default message" />
+		</config-file>
+        <js-module src="src/firefoxos/notification.js" name="firefoxCNotification">
+            <merges target="window.CNotification" />
         </js-module>
     </platform>
 

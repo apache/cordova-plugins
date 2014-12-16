@@ -20,7 +20,51 @@
 */ 
 
 var modulemapper = require('cordova/modulemapper');
-var Notification = require('./Notification');
 
+// keep hold of notification for future use
+var mozNotifications = {};
 var mozNotification = modulemapper.getOriginalSymbol(window, 'window.Notification');
 
+function makeNotification(successCB, errorCB, options) {
+    var nId = options.notificationId;
+    var title = options.title;
+    delete options.notificationId;
+    delete options.title;
+
+    var n = new mozNotification(title, options);
+    mozNotifications[nId] = n;
+    successCB();
+}
+
+// errors currently reporting String for debug only
+function create(successCB, errorCB, options) {
+    if (mozNotification.permission === 'denied') {
+        errorCB('FFOS Notification: Permission denied');
+        return;
+    }
+    if (mozNotification.permission === 'granted') {
+        makeNotification(successCB, errorCB, options);
+        return;
+    }
+    mozNotification.requestPermission(function (permission) {
+        if (permission === 'granted') {
+            makeNotification(successCB, errorCB, options);
+        } else {
+            errorCB('FFOS Notification: User denied');
+        }
+    });
+}
+
+function close(successCB, errorCB, params) {
+    var nId = params.notificationId;
+    mozNotifications[nId].close();
+    successCB();
+}
+
+
+module.exports = {
+    create: create,
+    close: close
+};    
+    
+require("cordova/firefoxos/commandProxy").add("CNotification", module.exports);
