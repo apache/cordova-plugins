@@ -31,8 +31,8 @@ function makeNotification(successCB, errorCB, options) {
     delete options.notificationId;
     delete options.title;
 
-    var n = new mozNotification(title, options);
-    mozNotifications[nId] = n;
+    var notification = new mozNotification(title, options);
+    mozNotifications[nId] = notification;
     successCB();
 }
 
@@ -55,16 +55,18 @@ function create(successCB, errorCB, options) {
     });
 }
 
-function close(successCB, errorCB, params) {
+function remove(successCB, errorCB, params) {
     var nId = params.notificationId;
     mozNotifications[nId].close();
-    successCB();
+    if (successCB) {
+        successCB();
+    }
 }
 
 
 module.exports = {
     create: create,
-    close: close
+    remove: remove
 };    
     
 require("cordova/firefoxos/commandProxy").add("CNotification", module.exports);
