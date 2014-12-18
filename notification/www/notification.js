@@ -43,15 +43,19 @@ Emitter.methods = ["addEventListener", "dispatchEvent", "removeEventListener"];
 
 function CNotification(title, options, successCB, errorCB) {
     // add emitter methods to Notification
+    var self = this;
+    function success() {
+        successCB(self);
+    }
     Emitter.call(this);
     this.title = options.title = title;
     this.notificationId = options.notificationId = nId++;
-    exec(successCB, errorCB, "CNotification", "create", options);
+    exec(success, errorCB, "CNotification", "create", options);
 }
 
-CNotification.close = function(fields, successCB, errorCB, options) {
-    options.notificationId = this.notificationId;
-    exec(successCB, errorCB, "CNotification", "close", [fields, options]);
+CNotification.prototype.close = function(successCB, errorCB) {
+    var options = {notificationId: this.notificationId};
+    exec(successCB, errorCB, "CNotification", "remove", options);
 };
 
 module.exports = CNotification;
