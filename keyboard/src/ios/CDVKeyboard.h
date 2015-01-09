@@ -21,8 +21,6 @@
 
 @interface CDVKeyboard : CDVPlugin {
     @protected
-    CGRect _savedWebViewFrame;
-    @protected
     BOOL _shrinkView;
     @protected
     BOOL _hideFormAccessoryBar;
@@ -31,7 +29,7 @@
     @protected
     id _hideFormAccessoryBarKeyboardShowObserver, _hideFormAccessoryBarKeyboardHideObserver;
     @protected
-    id _shrinkViewKeyboardShowObserver, _shrinkViewKeyboardHideObserver;
+    id _shrinkViewKeyboardWillChangeFrameObserver;
     @protected
     CGFloat _accessoryBarHeight;
 }
