@@ -101,6 +101,8 @@
                                                              }];
     
     self.webView.scrollView.delegate = self;
+    
+    _accessoryBarHeight = 44;
 }
 
 // //////////////////////////////////////////////////
@@ -269,8 +271,13 @@
     CGRect keyboard = [self.viewController.view convertRect: ((NSValue*)notif.userInfo[@"UIKeyboardFrameEndUserInfoKey"]).CGRectValue fromView: nil];
     CGRect keyboardIntersection = CGRectIntersection(screen, keyboard);
 
-    if(CGRectContainsRect(screen, keyboardIntersection) && _shrinkView){
+    if(CGRectContainsRect(screen, keyboardIntersection) && !CGRectIsEmpty(keyboardIntersection)&& _shrinkView){
         screen.size.height -= MIN(keyboardIntersection.size.height, keyboardIntersection.size.width);
+        
+        if (_hideFormAccessoryBar){
+            screen.size.height += _accessoryBarHeight;
+        }
+        
         self.webView.scrollView.scrollEnabled = !self.disableScrollingInShrinkView;
     }
     
