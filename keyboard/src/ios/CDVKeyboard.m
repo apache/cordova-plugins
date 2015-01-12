@@ -32,7 +32,7 @@
 
 @implementation CDVKeyboard
 
-@dynamic shrinkView, hideFormAccessoryBar;
+@dynamic hideFormAccessoryBar;
 
 - (id)settingForKey:(NSString*)key
 {
@@ -155,18 +155,6 @@
     }
 
     _hideFormAccessoryBar = ahideFormAccessoryBar;
-}
-
-// //////////////////////////////////////////////////
-
-- (BOOL)shrinkView
-{
-    return _shrinkView;
-}
-
-- (void)setShrinkView:(BOOL)ashrinkView
-{
-    _shrinkView = ashrinkView;
 }
 
 // //////////////////////////////////////////////////
