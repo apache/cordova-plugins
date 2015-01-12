@@ -93,7 +93,13 @@
             [weakSelf.commandDelegate evalJs:@"Keyboard.fireOnHiding();"];
         }];
     
-    self.webView.scrollView.scrollEnabled = NO;
+    _shrinkViewKeyboardWillChangeFrameObserver = [nc addObserverForName:UIKeyboardWillChangeFrameNotification
+                                                                 object:nil
+                                                                  queue:[NSOperationQueue mainQueue]
+                                                             usingBlock:^(NSNotification* notification) {
+                                                                 [weakSelf performSelector:@selector(shrinkViewKeyboardWillChangeFrame:) withObject:notification afterDelay:0];
+                                                             }];
+    
     self.webView.scrollView.delegate = self;
 }
 
@@ -158,31 +164,6 @@
 
 - (void)setShrinkView:(BOOL)ashrinkView
 {
-    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
-    __weak CDVKeyboard* weakSelf = self;
-
-    if (ashrinkView == _shrinkView) {
-        return;
-    }
-
-    // No-op on iOS7.0.  It already resizes webview by default, and this plugin is causing layout issues
-    // with fixed position elements.  We possibly should attempt to implement shringview = false on iOS7.0.
-    // iOS 7.1+ behave the same way as iOS 6
-    if (!(NSFoundationVersionNumber == NSFoundationVersionNumber_iOS_7_0)) {
-        if (ashrinkView) {
-            [nc removeObserver:_shrinkViewKeyboardWillChangeFrameObserver];
-            _shrinkViewKeyboardWillChangeFrameObserver = [nc addObserverForName:UIKeyboardWillChangeFrameNotification
-                                                              object:nil
-                                                               queue:[NSOperationQueue mainQueue]
-                                                          usingBlock:^(NSNotification* notification) {
-                    [weakSelf performSelector:@selector(shrinkViewKeyboardWillChangeFrame:) withObject:notification afterDelay:0];
-                }];
-
-        } else {
-            [nc removeObserver:_shrinkViewKeyboardWillChangeFrameObserver];
-        }
-    }
-
     _shrinkView = ashrinkView;
 }
 
@@ -275,12 +256,22 @@
 
 - (void)shrinkViewKeyboardWillChangeFrame:(NSNotification*)notif
 {
+    // No-op on iOS7.0.  It already resizes webview by default, and this plugin is causing layout issues
+    // with fixed position elements.  We possibly should attempt to implement shringview = false on iOS7.0.
+    // iOS 7.1+ behave the same way as iOS 6
+    if (NSFoundationVersionNumber == NSFoundationVersionNumber_iOS_7_0){
+        return;
+    }
+    
+    self.webView.scrollView.scrollEnabled = YES;
+    
     CGRect screen = [self.viewController.view convertRect:[[UIScreen mainScreen] applicationFrame] fromView:nil];
     CGRect keyboard = [self.viewController.view convertRect: ((NSValue*)notif.userInfo[@"UIKeyboardFrameEndUserInfoKey"]).CGRectValue fromView: nil];
     CGRect keyboardIntersection = CGRectIntersection(screen, keyboard);
 
-    if(CGRectContainsRect(screen, keyboardIntersection)){
+    if(CGRectContainsRect(screen, keyboardIntersection) && _shrinkView){
         screen.size.height -= MIN(keyboardIntersection.size.height, keyboardIntersection.size.width);
+        self.webView.scrollView.scrollEnabled = !self.disableScrollingInShrinkView;
     }
     
     __weak CDVKeyboard* weakSelf = self;
@@ -340,6 +331,8 @@
 
 #pragma mark UIScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    scrollView.bounds = self.webView.bounds;
+    if(_shrinkView){
+        scrollView.bounds = self.webView.bounds;
+    }
 }
 @end
