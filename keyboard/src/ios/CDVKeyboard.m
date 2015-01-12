@@ -70,14 +70,12 @@
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
             [weakSelf.commandDelegate evalJs:@"Keyboard.fireOnShow();"];
-            weakSelf.keyboardIsVisible = YES;
         }];
     _keyboardHideObserver = [nc addObserverForName:UIKeyboardDidHideNotification
                                             object:nil
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
             [weakSelf.commandDelegate evalJs:@"Keyboard.fireOnHide();"];
-            weakSelf.keyboardIsVisible = NO;
         }];
 
     _keyboardWillShowObserver = [nc addObserverForName:UIKeyboardWillShowNotification
@@ -85,12 +83,14 @@
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
             [weakSelf.commandDelegate evalJs:@"Keyboard.fireOnShowing();"];
+            weakSelf.keyboardIsVisible = YES;
         }];
     _keyboardWillHideObserver = [nc addObserverForName:UIKeyboardWillHideNotification
                                             object:nil
                                              queue:[NSOperationQueue mainQueue]
                                         usingBlock:^(NSNotification* notification) {
             [weakSelf.commandDelegate evalJs:@"Keyboard.fireOnHiding();"];
+            weakSelf.keyboardIsVisible = NO;
         }];
     
     _shrinkViewKeyboardWillChangeFrameObserver = [nc addObserverForName:UIKeyboardWillChangeFrameNotification
@@ -271,7 +271,7 @@
     CGRect keyboard = [self.viewController.view convertRect: ((NSValue*)notif.userInfo[@"UIKeyboardFrameEndUserInfoKey"]).CGRectValue fromView: nil];
     CGRect keyboardIntersection = CGRectIntersection(screen, keyboard);
 
-    if(CGRectContainsRect(screen, keyboardIntersection) && !CGRectIsEmpty(keyboardIntersection)&& _shrinkView){
+    if(CGRectContainsRect(screen, keyboardIntersection) && !CGRectIsEmpty(keyboardIntersection) && _shrinkView && self.keyboardIsVisible){
         screen.size.height -= MIN(keyboardIntersection.size.height, keyboardIntersection.size.width);
         
         if (_hideFormAccessoryBar){
