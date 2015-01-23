@@ -255,7 +255,10 @@
     
     self.webView.scrollView.scrollEnabled = YES;
     
-    CGRect screen = [self.viewController.view convertRect:[[UIScreen mainScreen] applicationFrame] fromView:nil];
+    CGRect screen = self.webView.frame.origin.y > 0 ?
+    [self.viewController.view convertRect:[[UIScreen mainScreen] applicationFrame] fromView:nil]:
+    [self.viewController.view convertRect:[[UIScreen mainScreen] bounds] fromView:nil];
+
     CGRect keyboard = [self.viewController.view convertRect: ((NSValue*)notif.userInfo[@"UIKeyboardFrameEndUserInfoKey"]).CGRectValue fromView: nil];
     CGRect keyboardIntersection = CGRectIntersection(screen, keyboard);
 
@@ -269,13 +272,7 @@
         self.webView.scrollView.scrollEnabled = !self.disableScrollingInShrinkView;
     }
     
-    __weak CDVKeyboard* weakSelf = self;
-    [UIView animateWithDuration:[notif.userInfo[@"UIKeyboardAnimationDurationUserInfoKey"] doubleValue]
-                          delay:0.0
-                        options:[notif.userInfo[@"UIKeyboardAnimationCurveUserInfoKey"] integerValue] << 16
-                     animations:^{
-                         weakSelf.webView.frame = screen;
-                     }completion:nil];
+    self.webView.frame = screen;
 }
 
 // //////////////////////////////////////////////////
