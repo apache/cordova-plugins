@@ -35,12 +35,13 @@ public class NavigationWhitelistPlugin extends CordovaPlugin {
 
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 
+        allowedNavigationPatterns.addWhiteListEntry("file:///android_asset/www/*", false);
         new ConfigXmlParser(){
             public void handleStartTag(XmlResourceParser xml) {
                 String strNode = xml.getName();
                 if (strNode.equals("content")) {
                     String startPage = xml.getAttributeValue(null, "src");
-                    allowedNavigationPatterns.addWhiteListEntry("file:///*", false);
+                    allowedNavigationPatterns.addWhiteListEntry(startPage, false);
                 } else if (strNode.equals("allow-navigation")) {
                     String origin = xml.getAttributeValue(null, "href");
                     if ("*".equals(origin)) {
