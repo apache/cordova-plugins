@@ -14,8 +14,8 @@
 		<engine name="cordova" version=">=3.6.0" />
 	</engines>
 
-    <js-module src="www/notification.js" name="notification">
-        <clobbers target="window.CNotification" />
+    <js-module src="www/notification.js" name="Notification">
+        <clobbers target="window.Notification" />
     </js-module>
 
     <!-- firefoxos -->
@@ -23,8 +23,8 @@
         <config-file target="config.xml" parent="/*">
 			<permission name="desktop-notification" description="Cordova default message" />
 		</config-file>
-        <js-module src="src/firefoxos/notification.js" name="firefoxCNotification">
-            <merges target="window.CNotification" />
+        <js-module src="src/firefoxos/notification.js" name="firefoxNotification">
+            <runs />
         </js-module>
     </platform>
 
