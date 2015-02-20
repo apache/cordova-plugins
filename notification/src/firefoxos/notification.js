@@ -38,8 +38,12 @@ function makeNotification(successCB, errorCB, options) {
 
 // errors currently reporting String for debug only
 function create(successCB, errorCB, options) {
+    console.log('FxOS DEBUG: create', options);
+    successCB = (successCB) ? successCB : function() {};
+    errorCB = (errorCB) ? errorCB : function() {};
+
     if (mozNotification.permission === 'denied') {
-        errorCB('FFOS Notification: Permission denied');
+        errorCB('FxOS Notification: Permission denied');
         return;
     }
     if (mozNotification.permission === 'granted') {
@@ -50,17 +54,17 @@ function create(successCB, errorCB, options) {
         if (permission === 'granted') {
             makeNotification(successCB, errorCB, options);
         } else {
-            errorCB('FFOS Notification: User denied');
+            errorCB('FxOS Notification: User denied');
         }
     });
 }
 
 function remove(successCB, errorCB, params) {
+    successCB = (successCB) ? successCB : function() {};
+    errorCB = (errorCB) ? errorCB : function() {};
     var nId = params.notificationId;
     mozNotifications[nId].close();
-    if (successCB) {
-        successCB();
-    }
+    successCB();
 }
 
 
@@ -69,4 +73,4 @@ module.exports = {
     remove: remove
 };    
     
-require("cordova/firefoxos/commandProxy").add("CNotification", module.exports);
+require("cordova/exec/proxy").add("Notification", module.exports);
