@@ -7,9 +7,13 @@ This plugin implements a whitelist policy for navigating the application webview
 * Android 4.0.0 or above
 
 ## Navigation Whitelist
-Controls which URLs the WebView itself can be navigated to. The WebView can
-always navigate to `file://` URLs, but if you want to have it navigate to
-other schemes, you must add `<allow-navigation>` tags to your `config.xml`:
+Controls which URLs the WebView itself can be navigated to. Applies to
+top-level navigations only.
+
+Quirks: on Android it also applies to iframes for non-http(s) schemes.
+
+By default, navigations only to `file://` URLs, are allowed. To allow other
+other URLs, you must add `<allow-navigation>` tags to your `config.xml`:
 
     <!-- Allow links to example.com -->
     <allow-navigation href="http://example.com/*" />
