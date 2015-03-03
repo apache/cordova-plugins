@@ -23,9 +23,10 @@ other schemes, you must add `<allow-navigation>` tags to your `config.xml`:
          *NOT RECOMMENDED* -->
     <allow-navigation href="*" />
 
-    <!-- The above is equivalent to these two declarations -->
+    <!-- The above is equivalent to these three declarations -->
     <allow-navigation href="http://*/*" />
     <allow-navigation href="https://*/*" />
+    <allow-navigation href="data:*" />
 
 ## Intent Whitelist
 Controls which URLs the app is allowed to ask the system to open.
@@ -98,3 +99,6 @@ Here are some example CSP declarations for your `.html` pages:
     <!-- Allow XHRs via https only -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:"/>
 
+    <!-- Allow data: URLs within iframes -->
+    <!-- Note: You would also need an <allow-navigation href="data:*" /> in your config.xml -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; frame-src 'self' data:"/>

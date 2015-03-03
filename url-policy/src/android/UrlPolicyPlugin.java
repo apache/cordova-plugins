@@ -76,6 +76,7 @@ public class UrlPolicyPlugin extends CordovaPlugin {
                 if ("*".equals(origin)) {
                     allowedNavigations.addWhiteListEntry("http://*/*", false);
                     allowedNavigations.addWhiteListEntry("https://*/*", false);
+                    allowedNavigations.addWhiteListEntry("data:*", false);
                 } else {
                     allowedNavigations.addWhiteListEntry(origin, false);
                 }
