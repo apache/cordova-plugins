@@ -38,7 +38,7 @@ This whitelist does not apply to plugins, only hyperlinks and calls to `window.o
 
 In `config.xml`, add `<allow-intent>` tags, like this:
 
-    <!-- Allow links to example.com to open in a browser -->
+    <!-- Allow links to example.com to launch the system browser and get opened there -->
     <allow-intent href="http://example.com/*" />
 
     <!-- Wildcards are allowed for the protocol, as a prefix
