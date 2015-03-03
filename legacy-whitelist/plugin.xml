@@ -27,7 +27,6 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     <license>Apache 2.0</license>
     <keywords>cordova,whitelist</keywords>
 
-    <!-- android -->
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="Whitelist" >
@@ -39,7 +38,7 @@ xmlns:android="http://schemas.android.com/apk/res/android"
         <source-file src="src/android/LegacyWhitelistPlugin.java" target-dir="src/org/apache/cordova/whitelist" />
     </platform>
 
-    <!-- ios -->
+    <!--
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="Whitelist">
@@ -51,4 +50,5 @@ xmlns:android="http://schemas.android.com/apk/res/android"
         <header-file src="src/ios/CDVLegacyWhitelistPlugin.h" />
         <source-file src="src/ios/CDVLegacyWhitelistPlugin.m" />
     </platform>
+    -->
 </plugin>
