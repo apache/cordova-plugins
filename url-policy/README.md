@@ -30,6 +30,7 @@ other schemes, you must add `<allow-navigation>` tags to your `config.xml`:
 
 ## Intent Whitelist
 Controls which URLs the app is allowed to ask the system to open.
+By default, no external URLs are allowed.
 
 On Android, this equates to sending an intent of type BROWSEABLE.
 
@@ -81,9 +82,9 @@ In `config.xml`, add `<access>` tags, like this:
     <access origin="*" />
 
 ### Content Security Policy
-The network whitelist is not able to filter all types of requests (e.g.
+On Android and iOS, the network whitelist is not able to filter all types of requests (e.g.
 `<video>` & WebSockets are not blocked). So, in addition to the whitelist,
- you use a [Content Security Policy](http://content-security-policy.com/) `<meta>` tag
+you should use a [Content Security Policy](http://content-security-policy.com/) `<meta>` tag
 on all of your pages.
 
 On Android, support for CSP within the system webview starts with KitKat.
