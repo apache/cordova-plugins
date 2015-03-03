@@ -61,6 +61,8 @@ In `config.xml`, add `<allow-intent>` tags, like this:
 ## Network Request Whitelist
 Controls which network requests (images, XHRs, etc) are allowed to be made.
 
+Note: Please use a Content Security Policy (see below) instead (or also), since it is more secure.  This whitelist is mostly historical for webviews which do not support CSP.
+
 By default, only requests to `file://` URLs are allowed.
 
 In `config.xml`, add `<access>` tags, like this:
