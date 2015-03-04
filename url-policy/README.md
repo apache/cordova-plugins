@@ -63,11 +63,9 @@ In `config.xml`, add `<allow-intent>` tags, like this:
     <allow-intent href="*" />
 
 ## Network Request Whitelist
-Controls which network requests (images, XHRs, etc) are allowed to be made.
+Controls which network requests (images, XHRs, etc) are allowed to be made (via cordova native hooks).
 
-Note: Please use a Content Security Policy (see below) instead (or also), since it is more secure.  This whitelist is mostly historical for webviews which do not support CSP.
-
-By default, only requests to `file://` URLs are allowed.
+Note: We suggest you use a Content Security Policy (see below), which is more secure.  This whitelist is mostly historical for webviews which do not support CSP.
 
 In `config.xml`, add `<access>` tags, like this:
 
@@ -87,13 +85,14 @@ In `config.xml`, add `<access>` tags, like this:
     <!-- Don't block any requests -->
     <access origin="*" />
 
-### Content Security Policy
-On Android and iOS, the network whitelist is not able to filter all types of requests (e.g.
-`<video>` & WebSockets are not blocked). So, in addition to the whitelist,
-you should use a [Content Security Policy](http://content-security-policy.com/) `<meta>` tag
-on all of your pages.
+Without any `<access>` tags, only requests to `file://` URLs are allowed. However, the default cordova application should include `<access origin="*">` by default.
 
-On Android, support for CSP within the system webview starts with KitKat.
+### Content Security Policy
+Controls which network requests (images, XHRs, etc) are allowed to be made (via webview directly).
+
+On Android and iOS, the network request whitelist (see above) is not able to filter all types of requests (e.g. `<video>` & WebSockets are not blocked). So, in addition to the whitelist, you should use a [Content Security Policy](http://content-security-policy.com/) `<meta>` tag on all of your pages.
+
+On Android, support for CSP within the system webview starts with KitKat (but is available on all versions using Crosswalk WebView).
 
 Here are some example CSP declarations for your `.html` pages:
 
