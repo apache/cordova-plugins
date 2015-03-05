@@ -1,4 +1,4 @@
-# cordova-plugin-url-policy
+# cordova-plugin-whitelist
 
 This plugin implements a whitelist policy for navigating the application webview on Cordova 4.0
 
