@@ -42,6 +42,10 @@ This whitelist does not apply to plugins, only hyperlinks and calls to `window.o
 
 In `config.xml`, add `<allow-intent>` tags, like this:
 
+    <!-- Allow links to web pages to open in a browser -->
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+
     <!-- Allow links to example.com to open in a browser -->
     <allow-intent href="http://example.com/*" />
 
