@@ -89,7 +89,9 @@ In `config.xml`, add `<access>` tags, like this:
     <!-- Don't block any requests -->
     <access origin="*" />
 
-Without any `<access>` tags, only requests to `file://` URLs are allowed. However, the default cordova application should include `<access origin="*">` by default.
+Without any `<access>` tags, only requests to `file://` URLs are allowed. However, the default Cordova application includes `<access origin="*">` by default.
+
+Quirk: Android also allows requests to https://ssl.gstatic.com/accessibility/javascript/android/ by default, since this is required for TalkBack to function properly.
 
 ### Content Security Policy
 Controls which network requests (images, XHRs, etc) are allowed to be made (via webview directly).
@@ -105,6 +107,9 @@ Here are some example CSP declarations for your `.html` pages:
 
     <!-- Enable all requests, inline styles, and eval() -->
     <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' 'unsafe-inline'; script-src: 'self' 'unsafe-inline' 'unsafe-eval' "/>
+
+    <!-- Allow requests to https://ssl.gstatic.com/accessibility/javascript/android/ (required for TalkBack on Android) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://ssl.gstatic.com/accessibility/javascript/android/"/>
 
     <!-- Allow XHRs via https only -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:"/>
