@@ -22,9 +22,9 @@ package org.apache.cordova.whitelist;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.Whitelist;
+import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
-import android.content.res.XmlResourceParser;
 import android.util.Log;
 
 public class WhitelistPlugin extends CordovaPlugin {
@@ -41,9 +41,9 @@ public class WhitelistPlugin extends CordovaPlugin {
         this(new Whitelist(), new Whitelist(), null);
         new CustomConfigXmlParser().parse(context);
     }
-    public WhitelistPlugin(XmlResourceParser xmlResourceParser) {
+    public WhitelistPlugin(XmlPullParser xmlParser) {
         this(new Whitelist(), new Whitelist(), null);
-        new CustomConfigXmlParser().parse(xmlResourceParser);
+        new CustomConfigXmlParser().parse(xmlParser);
     }
     public WhitelistPlugin(Whitelist allowedNavigations, Whitelist allowedIntents, Whitelist allowedRequests) {
         if (allowedRequests == null) {
@@ -66,7 +66,7 @@ public class WhitelistPlugin extends CordovaPlugin {
     }
 
     private class CustomConfigXmlParser extends  ConfigXmlParser {
-        public void handleStartTag(XmlResourceParser xml) {
+        public void handleStartTag(XmlPullParser xml) {
             String strNode = xml.getName();
             if (strNode.equals("content")) {
                 String startPage = xml.getAttributeValue(null, "src");
@@ -102,7 +102,7 @@ public class WhitelistPlugin extends CordovaPlugin {
                 }
             }
         }
-        public void handleEndTag(XmlResourceParser xml) {
+        public void handleEndTag(XmlPullParser xml) {
         }
     }
 
