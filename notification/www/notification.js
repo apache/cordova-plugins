@@ -42,20 +42,37 @@ function Emitter () {
 Emitter.methods = ["addEventListener", "dispatchEvent", "removeEventListener"];
 
 function Notification(title, options, successCB, errorCB) {
-    // add emitter methods to Notification
-    console.log('DEBUG: Notification created', title, options);
+
+    options = (options) ? options : {};
+    successCB = (successCB) ? successCB : function() {};
+    errorCB = (errorCB) ? errorCB : function() {};
+
+    // return object in success callback
     var self = this;
     function success() {
         successCB(self);
     }
+
+    // add emitter methods to Notification
     Emitter.call(this);
+
+    // set parameters
     this.title = options.title = title;
-    this.notificationId = options.notificationId = nId++;
+    this.dir = options.dir || null;
+    this.lang = options.lang || null;
+    this.body = options.dir || null;
+    this.dir = options.dir || null;
+    this.dir = options.dir || null;
+    this.dir = options.dir || null;
+    // add and store notificationId
+    this._notificationId = options.notificationId = nId++;
+    options.pluginObject = self;
     exec(success, errorCB, "Notification", "create", options);
 }
 
+// handling closing an event
 Notification.prototype.close = function(successCB, errorCB) {
-    var options = {notificationId: this.notificationId};
+    var options = {notificationId: this._notificationId};
     exec(successCB, errorCB, "Notification", "remove", options);
 };
 

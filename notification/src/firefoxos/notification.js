@@ -19,31 +19,53 @@
  *
 */ 
 
+var NotificationError = require('./NotificationError');
 var modulemapper = require('cordova/modulemapper');
 
 // keep hold of notification for future use
 var mozNotifications = {};
 var mozNotification = modulemapper.getOriginalSymbol(window, 'window.Notification');
 
+var closeEvent = new Event('close');
+var clickEvent = new Event('click');
+var showEvent = new Event('show');
+var errorEvent = new Event('error');
+
 function makeNotification(successCB, errorCB, options) {
-    var nId = options.notificationId;
     var title = options.title;
-    delete options.notificationId;
+    var nId = options.notificationId;
+    var pluginObject = options.pluginObject;
     delete options.title;
+    delete options.notificationId;
+    delete options.pluginObject;
 
     var notification = new mozNotification(title, options);
     mozNotifications[nId] = notification;
+
+    // handle events
+    notification.onclose = function() {
+        pluginObject.dispatchEvent(closeEvent);
+    }
+    notification.onclick = function() {
+        pluginObject.dispatchEvent(clickEvent);
+    }
+    notification.onshow = function() {
+        pluginObject.dispatchEvent(showEvent);
+    }
+    notification.onerror = function() {
+        pluginObject.dispatchEvent(errorEvent);
+    }
+
     successCB();
 }
 
 // errors currently reporting String for debug only
 function create(successCB, errorCB, options) {
     console.log('FxOS DEBUG: create', options);
-    successCB = (successCB) ? successCB : function() {};
-    errorCB = (errorCB) ? errorCB : function() {};
 
     if (mozNotification.permission === 'denied') {
-        errorCB('FxOS Notification: Permission denied');
+        errorCB(new NotificationError(NotificationError.PERMISSION_DENIED,
+              'FxOS Notification: Permission denied'));
         return;
     }
     if (mozNotification.permission === 'granted') {
@@ -54,7 +76,8 @@ function create(successCB, errorCB, options) {
         if (permission === 'granted') {
             makeNotification(successCB, errorCB, options);
         } else {
-            errorCB('FxOS Notification: User denied');
+            errorCB(new NotificationError(NotificationError.USER_DENIED,
+                  'FxOS Notification: User denied'));
         }
     });
 }
