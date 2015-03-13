@@ -27,10 +27,12 @@
 
 #define LOCAL_FILESYSTEM_PATH   @"local-filesystem"
 #define ASSETS_LIBRARY_PATH     @"assets-library"
+#define ERROR_PATH              @"error"
 
 @interface GCDWebServer()
 - (GCDWebServerResponse*)_responseWithContentsOfDirectory:(NSString*)path;
 @end
+
 
 @implementation CDVLocalWebServer
 
@@ -60,25 +62,35 @@
         }
     }
 #endif
+
+    NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
+    self.server = [[GCDWebServer alloc] init];
+    [self.server startWithPort:0 bonjourName:nil];
+    [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
+
     if (useLocalWebServer) {
-		// Create server
-        self.server = [[GCDWebServer alloc] init];
-		NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
-        
         [self addAppFileSystemHandler:authToken basePath:[NSString stringWithFormat:@"/%@/", appBasePath] indexPage:indexPage];
-        
-        [self.server startWithPort:port bonjourName:nil];
-        [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
         
         // add after server is started to get the true port
         [self addFileSystemHandlers:authToken];
+        [self addErrorSystemHandler:authToken];
         
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
 		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
         
     } else {
-        NSLog(@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@), local web server not started.", vc.startPage);
+        NSString* error = [NSString stringWithFormat:@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@).", vc.startPage];
+        NSLog(@"%@", error);
+        
+        [self addErrorSystemHandler:authToken];
+
+        vc.startPage = [self createErrorUrl:error authToken:authToken];
     }
+}
+
+- (NSString*) createErrorUrl:(NSString*)error authToken:(NSString*)authToken
+{
+    return [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, ERROR_PATH, [error stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding], authToken];
 }
 
 -  (void) addFileSystemHandlers:(NSString*)authToken
@@ -267,5 +279,21 @@
     
     [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
 }
+
+- (void) addErrorSystemHandler:(NSString*)authToken
+{
+    NSString* basePath = [NSString stringWithFormat:@"/%@/", ERROR_PATH];
+
+    GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
+        
+        NSString* errorString = [request.path substringFromIndex:basePath.length]; // error string is from the url path
+        NSString* html = [NSString stringWithFormat:@"<h1 style='margin-top:40px; font-size:6vw'>ERROR</h1><h2 style='font-size:3vw'>%@</h2>", errorString];
+        GCDWebServerResponse* response = [GCDWebServerDataResponse responseWithHTML:html];
+        complete(response);
+    };
+    
+    [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
+}
+
 
 @end
