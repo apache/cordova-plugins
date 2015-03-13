@@ -26,7 +26,7 @@
     <hook type="after_plugin_install" src="scripts/after_install.js" />
     <hook type="before_plugin_uninstall" src="scripts/before_uninstall.js" />
     
-    <dependency id="org.apache.cordova.file" version=">=1.0.1" />
+    <dependency id="org.apache.cordova.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file.git" version=">=1.3.4" />
 
     <engines>
         <engine name="cordova" version=">=3.7.0" />
