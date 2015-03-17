@@ -21,11 +21,11 @@
 
 @interface CDVAppDelegate (SwizzledMethods)
 
-- (void) customApplication:(UIApplication*)application didReceiveLocalNotification:(UILocalNotification*)notification;
+- (void) cdv_notification_rebroadcastApplication:(UIApplication*)application didReceiveLocalNotification:(UILocalNotification*)notification;
 
-- (void) customApplication:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken;
+- (void) cdv_notification_rebroadcastApplication:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken;
 
-- (void) customApplication:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
+- (void) cdv_notification_rebroadcastApplication:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error;
 
 @end
 
