@@ -12,7 +12,7 @@
     <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugins.git</repo>
 
 	<engines>
-		<engine name="cordova" version=">=3.0.0" />
+		<engine name="cordova" version=">=3.9.9" />
 	</engines>
     
     <!-- ios -->
