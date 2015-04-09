@@ -52,7 +52,7 @@
             useLocalWebServer = YES;
         }
     }
-    
+
     // check setting
 #if TARGET_IPHONE_SIMULATOR
     if (useLocalWebServer) {
@@ -65,23 +65,23 @@
 
     NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
     self.server = [[GCDWebServer alloc] init];
-    [self.server startWithPort:0 bonjourName:nil];
+    [self.server startWithPort:port bonjourName:nil];
     [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
 
     if (useLocalWebServer) {
         [self addAppFileSystemHandler:authToken basePath:[NSString stringWithFormat:@"/%@/", appBasePath] indexPage:indexPage];
-        
+
         // add after server is started to get the true port
         [self addFileSystemHandlers:authToken];
         [self addErrorSystemHandler:authToken];
-        
+
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
 		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
-        
+
     } else {
         NSString* error = [NSString stringWithFormat:@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@).", vc.startPage];
         NSLog(@"%@", error);
-        
+
         [self addErrorSystemHandler:authToken];
 
         vc.startPage = [self createErrorUrl:error authToken:authToken];
@@ -97,17 +97,17 @@
 {
     [self addLocalFileSystemHandler:authToken];
     [self addAssetLibraryFileSystemHandler:authToken];
-    
+
     NSURL* localServerURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:%lu", (unsigned long)self.server.port]];
 
     SEL sel = NSSelectorFromString(@"setUrlTransformer:");
-    
+
     if ([self.commandDelegate respondsToSelector:sel]) {
         NSURL* (^urlTransformer)(NSURL*) = ^NSURL* (NSURL* urlToTransform) {
             NSURL* transformedUrl = urlToTransform;
-            
+
             NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", [localServerURL.port unsignedIntegerValue]];
-            
+
             if ([[urlToTransform scheme] isEqualToString:ASSETS_LIBRARY_PATH]) {
                 transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@",
                         localhostUrlString,
@@ -123,12 +123,12 @@
                        urlToTransform.path
                         ]];
             }
-            
+
             return transformedUrl;
         };
-        
+
         ((void (*)(id, SEL, id))objc_msgSend)(self.commandDelegate, sel, urlTransformer);
-        
+
     } else {
         NSLog(@"WARNING: CDVPlugin's commandDelegate is missing a urlTransformer property. The local web server can't set it to transform file and asset-library urls");
     }
@@ -137,7 +137,7 @@
 - (void) addFileSystemHandler:(GCDWebServerAsyncProcessBlock)processRequestForResponseBlock basePath:(NSString*)basePath authToken:(NSString*)authToken cacheAge:(NSUInteger)cacheAge
 {
     GCDWebServerMatchBlock matchBlock = ^GCDWebServerRequest *(NSString* requestMethod, NSURL* requestURL, NSDictionary* requestHeaders, NSString* urlPath, NSDictionary* urlQuery) {
-        
+
         if (![requestMethod isEqualToString:@"GET"]) {
             return nil;
         }
@@ -146,15 +146,15 @@
         }
         return [[GCDWebServerRequest alloc] initWithMethod:requestMethod url:requestURL headers:requestHeaders path:urlPath query:urlQuery];
     };
-    
+
     GCDWebServerAsyncProcessBlock asyncProcessBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
-        
+
         //check if it is a request from localhost
         NSString *host = [request.headers objectForKey:@"Host"];
         if (host==nil || [host hasPrefix:@"localhost"] == NO ) {
             complete([GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden message:@"FORBIDDEN"]);
         }
-        
+
         //check if the querystring or the cookie has the token
         BOOL hasToken = (request.URL.query && [request.URL.query containsString:authToken]);
         NSString *cookie = [request.headers objectForKey:@"Cookie"];
@@ -162,14 +162,14 @@
         if (!hasToken && !hasCookie) {
             complete([GCDWebServerErrorResponse responseWithClientError:kGCDWebServerHTTPStatusCode_Forbidden message:@"FORBIDDEN"]);
         }
-        
+
         processRequestForResponseBlock(request, ^void(GCDWebServerResponse* response){
             if (response) {
                 response.cacheControlMaxAge = cacheAge;
             } else {
                 response = [GCDWebServerResponse responseWithStatusCode:kGCDWebServerHTTPStatusCode_NotFound];
             }
-            
+
             if (hasToken && !hasCookie) {
                 //set cookie
                 [response setValue:authToken forAdditionalHeader:@"Set-Cookie"];
@@ -177,19 +177,19 @@
             complete(response);
         });
     };
-    
+
     [self.server addHandlerWithMatchBlock:matchBlock asyncProcessBlock:asyncProcessBlock];
 }
 
 - (void) addAppFileSystemHandler:(NSString*)authToken basePath:(NSString*)basePath indexPage:(NSString*)indexPage
 {
     BOOL allowRangeRequests = YES;
-    
+
     NSString* directoryPath = [[self.commandDelegate pathForResource:indexPage] stringByDeletingLastPathComponent];
 ;
-    
+
     GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
-        
+
         NSString* filePath = [directoryPath stringByAppendingPathComponent:[request.path substringFromIndex:basePath.length]];
         NSString* fileType = [[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:NULL] fileType];
         GCDWebServerResponse* response = nil;
@@ -213,10 +213,10 @@
                 }
             }
         }
-        
+
         complete(response);
     };
-    
+
     [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
 }
 
@@ -224,13 +224,13 @@
 {
     NSString* basePath = [NSString stringWithFormat:@"/%@/", LOCAL_FILESYSTEM_PATH];
     BOOL allowRangeRequests = YES;
-    
+
     GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
-        
+
         NSString* filePath = [request.path substringFromIndex:basePath.length];
         NSString* fileType = [[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:NULL] fileType];
         GCDWebServerResponse* response = nil;
-        
+
         if (fileType && [fileType isEqualToString:NSFileTypeRegular]) {
             if (allowRangeRequests) {
                 response = [GCDWebServerFileResponse responseWithFile:filePath byteRange:request.byteRange];
@@ -239,21 +239,21 @@
                 response = [GCDWebServerFileResponse responseWithFile:filePath];
             }
         }
-        
+
         complete(response);
     };
-    
+
     [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
 }
 
 - (void) addAssetLibraryFileSystemHandler:(NSString*)authToken
 {
     NSString* basePath = [NSString stringWithFormat:@"/%@/", ASSETS_LIBRARY_PATH];
-    
+
     GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
-        
+
         NSURL* assetUrl = [NSURL URLWithString:[NSString stringWithFormat:@"assets-library:/%@", [request.path substringFromIndex:basePath.length]]];
-        
+
         ALAssetsLibrary* assetsLibrary = [[ALAssetsLibrary alloc] init];
         [assetsLibrary assetForURL:assetUrl
                        resultBlock:^(ALAsset* asset) {
@@ -264,7 +264,7 @@
                                NSUInteger bufferSize = [assetRepresentation getBytes:buffer fromOffset:0.0 length:[assetRepresentation size] error:nil];
                                NSData* data = [NSData dataWithBytesNoCopy:buffer length:bufferSize freeWhenDone:YES];
                                NSString* MIMEType = (__bridge_transfer NSString*)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)[assetRepresentation UTI], kUTTagClassMIMEType);
-                               
+
                                complete([GCDWebServerDataResponse responseWithData:data contentType:MIMEType]);
                            } else {
                                complete(nil);
@@ -276,7 +276,7 @@
                       }
          ];
     };
-    
+
     [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
 }
 
@@ -285,13 +285,13 @@
     NSString* basePath = [NSString stringWithFormat:@"/%@/", ERROR_PATH];
 
     GCDWebServerAsyncProcessBlock processRequestBlock = ^void (GCDWebServerRequest* request, GCDWebServerCompletionBlock complete) {
-        
+
         NSString* errorString = [request.path substringFromIndex:basePath.length]; // error string is from the url path
         NSString* html = [NSString stringWithFormat:@"<h1 style='margin-top:40px; font-size:6vw'>ERROR</h1><h2 style='font-size:3vw'>%@</h2>", errorString];
         GCDWebServerResponse* response = [GCDWebServerDataResponse responseWithHTML:html];
         complete(response);
     };
-    
+
     [self addFileSystemHandler:processRequestBlock basePath:basePath authToken:authToken cacheAge:0];
 }
 
