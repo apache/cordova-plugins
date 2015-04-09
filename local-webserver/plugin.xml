@@ -17,24 +17,24 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<plugin id="org.apache.cordova.labs.local-webserver" version="2.3.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-labs-local-webserver" version="2.3.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>CordovaLocalWebServer</name>
     <description>Cordova Local Web Server Plugin</description>
     <keywords>cordova,local web server</keywords>
     <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugins.git</repo>
-    
+
     <hook type="after_plugin_install" src="scripts/after_install.js" />
     <hook type="before_plugin_uninstall" src="scripts/before_uninstall.js" />
-    
-    <dependency id="org.apache.cordova.file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file.git" version=">=1.3.4" />
+
+    <dependency id="cordova-plugin-file" url="https://git-wip-us.apache.org/repos/asf/cordova-plugin-file.git" version=">=1.3.4" />
 
     <engines>
         <engine name="cordova" version=">=3.7.0" />
     </engines>
-    
+
     <!-- ios -->
     <platform name="ios">
-        
+
         <config-file target="config.xml" parent="/*">
 		    <feature name="CordovaLocalWebServer">
 			    <param name="ios-package" value="CDVLocalWebServer"/>
@@ -45,7 +45,7 @@
 
 	    <header-file src="src/ios/CDVLocalWebServer.h" />
 	    <source-file src="src/ios/CDVLocalWebServer.m" />
-	    
+
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServer.h" />
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerConnection.h" />
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerFunctions.h" />
@@ -58,7 +58,7 @@
 	    <source-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerFunctions.m" />
 	    <source-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerRequest.m" />
 	    <source-file src="src/ios/GCDWebServer/GCDWebServer/Core/GCDWebServerResponse.m" />
-        
+
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Requests/GCDWebServerDataRequest.h" />
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Requests/GCDWebServerFileRequest.h" />
 	    <header-file src="src/ios/GCDWebServer/GCDWebServer/Requests/GCDWebServerMultiPartFormRequest.h" />
@@ -81,10 +81,10 @@
 	    <framework src="MobileCoreServices.framework" />
 	    <framework src="CFNetwork.framework" />
         <framework src="libz.dylib" />
-        
+
         <info>
         Your content tag in config.xml now points to a http://localhost:0 location (randomized port), e.g. &lt;content src="http://localhost:0" /&gt;
     </info>
 
-    </platform> 
+    </platform>
 </plugin>
