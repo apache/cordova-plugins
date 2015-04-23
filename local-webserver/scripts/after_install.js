@@ -44,8 +44,13 @@ module.exports = function(context) {
         content_tags[0].set('src', content_src_value);
     }
 
-    var pref = et.Element('preference', { name: 'AlternateContentSrc', value: old_content_src_value });
-    etree.getroot().append(pref);
+    var altcontentsrcTag = etree.findall("./preference[@name='AlternateContentSrc']");
+    if (altcontentsrcTag.length > 0) {
+        altcontentsrcTag[0].set('value', old_content_src_value);
+    } else {
+      var pref = et.Element('preference', { name: 'AlternateContentSrc', value: old_content_src_value });
+      etree.getroot().append(pref);
+    }
 
     data = etree.write({'indent': 4});
     fs.writeFileSync(config_xml, data);

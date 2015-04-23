@@ -45,11 +45,14 @@ module.exports = function(context) {
             content_tags[0].set('src', backup_data.content_src);
         }
     }
-    // There is a bug in remove :(
-    // var altcontentsrcTag = etree.findall("./preference[@name='AlternateContentSrc']");
-    // if (altcontentsrcTag.length > 0) {
-    //   etree.getroot().remove(altcontentsrcTag[0]);
-    // }
+    // There is a bug in elementtree remove :(
+    var altcontentsrcTag = etree.findall("./preference[@name='AlternateContentSrc']");
+    if (altcontentsrcTag.length > 0) {
+      try {
+        etree.getroot().remove(altcontentsrcTag[0]);
+      } catch (e) {
+      }
+    }
 
     data = etree.write({'indent': 4});
     fs.writeFileSync(config_xml, data);
