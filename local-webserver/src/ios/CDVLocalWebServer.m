@@ -20,6 +20,7 @@
 #import "CDVLocalWebServer.h"
 #import "GCDWebServerPrivate.h"
 #import <Cordova/CDVViewController.h>
+#import <Cordova/NSDictionary+CordovaPreferences.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <objc/message.h>
@@ -39,6 +40,7 @@
 - (void) pluginInitialize {
 
     BOOL useLocalWebServer = NO;
+    BOOL requirementsOK = NO;
     NSString* indexPage = @"index.html";
     NSString* appBasePath = @"www";
     NSUInteger port = 80;
@@ -51,6 +53,13 @@
             port = [[startPageUrl port] unsignedIntegerValue];
             useLocalWebServer = YES;
         }
+    }
+
+    requirementsOK = [self checkRequirements];
+    if (!requirementsOK) {
+        useLocalWebServer = NO;
+        NSString* alternateContentSrc = [self.commandDelegate.settings cordovaSettingForKey:@"AlternateContentSrc"];
+        vc.startPage = alternateContentSrc? alternateContentSrc : indexPage;
     }
 
     // check setting
@@ -79,13 +88,37 @@
 		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
 
     } else {
-        NSString* error = [NSString stringWithFormat:@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@).", vc.startPage];
-        NSLog(@"%@", error);
+        if (requirementsOK) {
+            NSString* error = [NSString stringWithFormat:@"WARNING: CordovaLocalWebServer: <content> tag src is not http://localhost[:port] (is %@).", vc.startPage];
+            NSLog(@"%@", error);
 
-        [self addErrorSystemHandler:authToken];
+            [self addErrorSystemHandler:authToken];
 
-        vc.startPage = [self createErrorUrl:error authToken:authToken];
+            vc.startPage = [self createErrorUrl:error authToken:authToken];
+        } else {
+            GWS_LOG_ERROR(@"%@ stopped, failed requirements check.", [self.server class]);
+            [self.server stop];
+        }
     }
+}
+
+- (BOOL) checkRequirements
+{
+    NSString* runtimeVersion = @"8.0";
+    NSString* pluginName = @"CDVWKWebViewEngine";
+
+    BOOL ios8 = IsAtLeastiOSVersion(runtimeVersion);
+    BOOL wkEnginePlugin = [[self.commandDelegate.settings cordovaSettingForKey:@"CordovaWebViewEngine"] isEqualToString:pluginName];
+
+    if (!ios8) {
+        NSLog(@"[ERROR] %@: Runtime requirement required is at least iOS %@", [self class], runtimeVersion);
+    }
+
+    if (!wkEnginePlugin) {
+        NSLog(@"[ERROR] %@: CordovaWebViewEngine preference must be %@", [self class], pluginName);
+    }
+
+    return ios8 && wkEnginePlugin;
 }
 
 - (NSString*) createErrorUrl:(NSString*)error authToken:(NSString*)authToken

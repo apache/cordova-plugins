@@ -38,13 +38,18 @@ module.exports = function(context) {
     if (content_tags.length > 0) {
         var backup_json = path.join(context.opts.plugin.dir, 'backup.json');
         var backup_data = JSON.parse(fs.readFileSync(backup_json).toString());
-        
+
         var config_content_src_value = content_tags[0].get('src');
         // it's our value, we can restore old value
         if (config_content_src_value === content_src_value) {
             content_tags[0].set('src', backup_data.content_src);
         }
     }
+    // There is a bug in remove :(
+    // var altcontentsrcTag = etree.findall("./preference[@name='AlternateContentSrc']");
+    // if (altcontentsrcTag.length > 0) {
+    //   etree.getroot().remove(altcontentsrcTag[0]);
+    // }
 
     data = etree.write({'indent': 4});
     fs.writeFileSync(config_xml, data);

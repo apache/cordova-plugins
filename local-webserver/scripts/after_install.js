@@ -40,9 +40,12 @@ module.exports = function(context) {
         var backup_json = path.join(context.opts.plugin.dir, 'backup.json');
         var backup_value = { content_src : old_content_src_value };
         fs.writeFileSync(backup_json, JSON.stringify(backup_value));
-        
+
         content_tags[0].set('src', content_src_value);
     }
+
+    var pref = et.Element('preference', { name: 'AlternateContentSrc', value: old_content_src_value });
+    etree.getroot().append(pref);
 
     data = etree.write({'indent': 4});
     fs.writeFileSync(config_xml, data);
