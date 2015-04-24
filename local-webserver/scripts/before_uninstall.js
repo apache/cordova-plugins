@@ -45,12 +45,15 @@ module.exports = function(context) {
             content_tags[0].set('src', backup_data.content_src);
         }
     }
-    // There is a bug in elementtree remove :(
+
     var altcontentsrcTag = etree.findall("./preference[@name='AlternateContentSrc']");
     if (altcontentsrcTag.length > 0) {
       try {
-        etree.getroot().remove(altcontentsrcTag[0]);
+         // elementtree 0.1.6
+         etree.getroot().remove(altcontentsrcTag[0]);
       } catch (e) {
+         // elementtree 0.1.5
+         etree.getroot().remove(0, altcontentsrcTag[0]);
       }
     }
 
