@@ -10,6 +10,18 @@ For the local web server to start, the url **must** be http://localhost, and you
     
 Check your console log for errors in configuration. 
 
+### localStorage, IndexedDB persistence
+
+If you plan on using HTML5 localStorage and/or IndexedDB, you must choose a fixed port in the `content` tag specified above. This is because of the HTML5 Origin policy (scheme, domain and port must be the same).
+
+In the `config.xml` in your project root, change the '0' port to a number between 1 and 49152 (avoiding the ephemeral port range of 49152 to 65535 on iOS). For example:
+    
+        <content src="http://localhost:49000" />
+    
+
+This port number must be consistent across all app launches for saved data to be accessed.
+
+
 ## Security Caveats
 
     In order to limit access to your app, requests are restricted to localhost and are protected with an auth token.
