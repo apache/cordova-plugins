@@ -73,8 +73,8 @@
 #endif
 
     NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
+
     self.server = [[GCDWebServer alloc] init];
-    [self.server startWithPort:port bonjourName:nil];
     [GCDWebServer setLogLevel:kGCDWebServerLoggingLevel_Error];
 
     if (useLocalWebServer) {
@@ -83,6 +83,9 @@
         // add after server is started to get the true port
         [self addFileSystemHandlers:authToken];
         [self addErrorSystemHandler:authToken];
+        
+        // handlers must be added before server starts
+        [self.server startWithPort:port bonjourName:nil];
 
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
 		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
@@ -93,11 +96,13 @@
             NSLog(@"%@", error);
 
             [self addErrorSystemHandler:authToken];
+            
+            // handlers must be added before server starts
+            [self.server startWithPort:port bonjourName:nil];
 
             vc.startPage = [self createErrorUrl:error authToken:authToken];
         } else {
             GWS_LOG_ERROR(@"%@ stopped, failed requirements check.", [self.server class]);
-            [self.server stop];
         }
     }
 }
@@ -131,12 +136,13 @@
     [self addLocalFileSystemHandler:authToken];
     [self addAssetLibraryFileSystemHandler:authToken];
 
-    NSURL* localServerURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:%lu", (unsigned long)self.server.port]];
-
     SEL sel = NSSelectorFromString(@"setUrlTransformer:");
+    __weak __typeof(self) weakSelf = self;
 
     if ([self.commandDelegate respondsToSelector:sel]) {
         NSURL* (^urlTransformer)(NSURL*) = ^NSURL* (NSURL* urlToTransform) {
+            NSURL* localServerURL = [NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:%lu", (unsigned long)weakSelf.server.port]];
+            
             NSURL* transformedUrl = urlToTransform;
 
             NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", [localServerURL.port unsignedIntegerValue]];
