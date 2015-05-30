@@ -24,6 +24,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <objc/message.h>
+#import <netinet/in.h>
 
 
 #define LOCAL_FILESYSTEM_PATH   @"local-filesystem"
@@ -71,6 +72,11 @@
         }
     }
 #endif
+    
+    if (port == 0) {
+        // CB-9096 - actually test for an available port, and set it explicitly
+        port = [self _availablePort];
+    }
 
     NSString* authToken = [NSString stringWithFormat:@"cdvToken=%@", [[NSProcessInfo processInfo] globallyUniqueString]];
 
@@ -105,6 +111,29 @@
             GWS_LOG_ERROR(@"%@ stopped, failed requirements check.", [self.server class]);
         }
     }
+}
+
+- (NSUInteger) _availablePort
+{
+    struct sockaddr_in addr4;
+    bzero(&addr4, sizeof(addr4));
+    addr4.sin_len = sizeof(addr4);
+    addr4.sin_family = AF_INET;
+    addr4.sin_port = 0; // set to 0 and bind to find available port
+    addr4.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    int listeningSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (bind(listeningSocket, (const void*)&addr4, sizeof(addr4)) == 0) {
+        struct sockaddr addr;
+        socklen_t addrlen = sizeof(addr);
+        if (getsockname(listeningSocket, &addr, &addrlen) == 0) {
+            struct sockaddr_in* sockaddr = (struct sockaddr_in*)&addr;
+            close(listeningSocket);
+            return ntohs(sockaddr->sin_port);
+        }
+    }
+    
+    return 0;
 }
 
 - (BOOL) checkRequirements
@@ -145,7 +174,7 @@
             
             NSURL* transformedUrl = urlToTransform;
 
-            NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", [localServerURL.port unsignedIntegerValue]];
+            NSString* localhostUrlString = [NSString stringWithFormat:@"http://localhost:%lu", (unsigned long)[localServerURL.port unsignedIntegerValue]];
 
             if ([[urlToTransform scheme] isEqualToString:ASSETS_LIBRARY_PATH]) {
                 transformedUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@/%@%@",
