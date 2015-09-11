@@ -42,7 +42,21 @@
 		    </feature>
             <preference name="CordovaLocalWebServerStartOnSimulator" value="true" />
         </config-file>
-
+        
+		<!-- temporary, until access tags translate into ATS directives in CB-9569 -->
+		<config-file target="*-Info.plist" parent="NSAppTransportSecurity">
+		    <dict>
+		        <key>NSExceptionDomains</key>
+		        <dict>
+		            <key>localhost</key>
+		            <dict>
+		                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+		                <true/>
+		            </dict>  
+		        </dict>  
+		    </dict>
+		</config-file>
+			
 	    <header-file src="src/ios/CDVLocalWebServer.h" />
 	    <source-file src="src/ios/CDVLocalWebServer.m" />
 
