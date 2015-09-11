@@ -5,7 +5,7 @@ This plugin uses the:
 - [cordova-plugin-wkwebview-engine](https://git-wip-us.apache.org/repos/asf/cordova-plugin-wkwebview-engine.git) plugin
 - [cordova-labs-local-webserver](https://git-wip-us.apache.org/repos/asf/cordova-plugins.git#master:local-webserver) plugin
 
-This plugin the master (4.0.x) branch of `cordova-ios`.
+This plugin uses the master (4.0.x) branch of `cordova-ios`.
 
 To `alpha test` this:
 
