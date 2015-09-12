@@ -138,21 +138,20 @@
 
 - (BOOL) checkRequirements
 {
-    NSString* runtimeVersion = @"8.0";
     NSString* pluginName = @"CDVWKWebViewEngine";
 
-    BOOL ios8 = IsAtLeastiOSVersion(runtimeVersion);
+    BOOL hasWkWebView = NSClassFromString(@"WKWebView") != nil;
     BOOL wkEnginePlugin = [[self.commandDelegate.settings cordovaSettingForKey:@"CordovaWebViewEngine"] isEqualToString:pluginName];
 
-    if (!ios8) {
-        NSLog(@"[ERROR] %@: Runtime requirement required is at least iOS %@", [self class], runtimeVersion);
+    if (!hasWkWebView) {
+        NSLog(@"[ERROR] %@: WKWebView class not found in the current runtime version.", [self class]);
     }
 
     if (!wkEnginePlugin) {
         NSLog(@"[ERROR] %@: CordovaWebViewEngine preference must be %@", [self class], pluginName);
     }
 
-    return ios8 && wkEnginePlugin;
+    return hasWkWebView && wkEnginePlugin;
 }
 
 - (NSString*) createErrorUrl:(NSString*)error authToken:(NSString*)authToken
