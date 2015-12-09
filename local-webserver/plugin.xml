@@ -42,6 +42,7 @@
 		    </feature>
             <preference name="CordovaLocalWebServerStartOnSimulator" value="true" />
 			<access origin="http://localhost" />
+      <allow-navigation href="http://localhost:*/*" />
         </config-file>
 		
         
