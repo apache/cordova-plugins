@@ -34,7 +34,7 @@ This plugin is only compatible with the 3.7.0 release of cordova-ios, or greater
 
 The local web server implementation is from https://github.com/swisspol/GCDWebServer
 
-To update with the latest from that repo:
+To update with the latest from that repo execute in the top-level directory:
 
         git remote add GCDWebServer https://github.com/swisspol/GCDWebServer.git
-        git subtree pull --prefix=src/ios/GCDWebServer --squash GCDWebServer master
+        git subtree pull --prefix=local-webserver/src/ios/GCDWebServer --squash GCDWebServer master
