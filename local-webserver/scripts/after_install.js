@@ -43,8 +43,8 @@ module.exports = function(context) {
             var backup_value = { content_src : old_content_src_value };
             fs.writeFileSync(backup_json, JSON.stringify(backup_value));
 
-            // XXX: Should we retain the name of the index file here?
-            content_tags[0].set('src', 'http://localhost:0');
+            var path = content_src.path.startsWith('/') ? content_src.path.substr(1) : content_src.path;
+            content_tags[0].set('src', 'http://localhost:0/' + path);
         }
     }
 
