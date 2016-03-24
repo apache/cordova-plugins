@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -292,9 +292,11 @@
 @synthesize uploadDirectory=_uploadDirectory, allowedFileExtensions=_allowedExtensions, allowHiddenItems=_allowHidden,
             title=_title, header=_header, prologue=_prologue, epilogue=_epilogue, footer=_footer;
 
+@dynamic delegate;
+
 - (instancetype)initWithUploadDirectory:(NSString*)path {
   if ((self = [super init])) {
-    NSBundle* siteBundle = [NSBundle bundleWithPath:[[NSBundle mainBundle] pathForResource:@"GCDWebUploader" ofType:@"bundle"]];
+    NSBundle* siteBundle = [NSBundle bundleWithPath:[[NSBundle bundleForClass:[GCDWebUploader class]] pathForResource:@"GCDWebUploader" ofType:@"bundle"]];
     if (siteBundle == nil) {
       return nil;
     }

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,10 @@ typedef enum {
   [self _logDelegateCall:_cmd];
 }
 
+- (void)webServerDidUpdateNATPortMapping:(GCDWebServer*)server {
+  [self _logDelegateCall:_cmd];
+}
+
 - (void)webServerDidConnect:(GCDWebServer*)server {
   [self _logDelegateCall:_cmd];
 }
@@ -141,9 +145,11 @@ int main(int argc, const char* argv[]) {
     NSString* authenticationRealm = nil;
     NSString* authenticationUser = nil;
     NSString* authenticationPassword = nil;
+    BOOL bindToLocalhost = NO;
+    BOOL requestNATPortMapping = NO;
     
     if (argc == 1) {
-      fprintf(stdout, "Usage: %s [-mode webServer | htmlPage | htmlForm | htmlFileUpload | webDAV | webUploader | streamingResponse | asyncResponse] [-record] [-root directory] [-tests directory] [-authenticationMethod Basic | Digest] [-authenticationRealm realm] [-authenticationUser user] [-authenticationPassword password]\n\n", basename((char*)argv[0]));
+      fprintf(stdout, "Usage: %s [-mode webServer | htmlPage | htmlForm | htmlFileUpload | webDAV | webUploader | streamingResponse | asyncResponse] [-record] [-root directory] [-tests directory] [-authenticationMethod Basic | Digest] [-authenticationRealm realm] [-authenticationUser user] [-authenticationPassword password] [--localhost]\n\n", basename((char*)argv[0]));
     } else {
       for (int i = 1; i < argc; ++i) {
         if (argv[i][0] != '-') {
@@ -188,6 +194,10 @@ int main(int argc, const char* argv[]) {
         } else if (!strcmp(argv[i], "-authenticationPassword") && (i + 1 < argc)) {
           ++i;
           authenticationPassword = [NSString stringWithUTF8String:argv[i]];
+        } else if (!strcmp(argv[i], "--localhost")) {
+          bindToLocalhost = YES;
+        } else if (!strcmp(argv[i], "--nat")) {
+          requestNATPortMapping = YES;
         }
       }
     }
@@ -354,13 +364,36 @@ int main(int argc, const char* argv[]) {
         fprintf(stdout, "Running in Async Response mode");
         webServer = [[GCDWebServer alloc] init];
         [webServer addHandlerForMethod:@"GET"
-                                  path:@"/"
+                                  path:@"/async"
                           requestClass:[GCDWebServerRequest class]
                      asyncProcessBlock:^(GCDWebServerRequest* request, GCDWebServerCompletionBlock completionBlock) {
           
           dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             GCDWebServerDataResponse* response = [GCDWebServerDataResponse responseWithData:[@"Hello World!" dataUsingEncoding:NSUTF8StringEncoding] contentType:@"text/plain"];
             completionBlock(response);
+          });
+          
+        }];
+        [webServer addHandlerForMethod:@"GET"
+                                  path:@"/async2"
+                          requestClass:[GCDWebServerRequest class]
+                     asyncProcessBlock:^(GCDWebServerRequest* request, GCDWebServerCompletionBlock handlerCompletionBlock) {
+          
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            __block int countDown = 10;
+            GCDWebServerStreamedResponse* response = [GCDWebServerStreamedResponse responseWithContentType:@"text/plain" asyncStreamBlock:^(GCDWebServerBodyReaderCompletionBlock readerCompletionBlock) {
+              
+              dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                
+                NSData* data = countDown ? [[NSString stringWithFormat:@"%i\n", countDown--] dataUsingEncoding:NSUTF8StringEncoding] : [NSData data];
+                readerCompletionBlock(data, nil);
+                
+              });
+              
+            }];
+            handlerCompletionBlock(response);
+            
           });
           
         }];
@@ -386,6 +419,8 @@ int main(int argc, const char* argv[]) {
         fprintf(stdout, "\n");
         NSMutableDictionary* options = [NSMutableDictionary dictionary];
         [options setObject:@8080 forKey:GCDWebServerOption_Port];
+        [options setObject:@(requestNATPortMapping) forKey:GCDWebServerOption_RequestNATPortMapping];
+        [options setObject:@(bindToLocalhost) forKey:GCDWebServerOption_BindToLocalhost];
         [options setObject:@"" forKey:GCDWebServerOption_BonjourName];
         if (authenticationUser && authenticationPassword) {
           [options setValue:authenticationRealm forKey:GCDWebServerOption_AuthenticationRealm];

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 #endif
 #endif
 #import <netinet/in.h>
+#import <dns_sd.h>
 
 #import "GCDWebServerPrivate.h"
 
@@ -47,9 +48,13 @@
 #define kDefaultPort 8080
 #endif
 
+#define kBonjourResolutionTimeout 5.0
+
 NSString* const GCDWebServerOption_Port = @"Port";
 NSString* const GCDWebServerOption_BonjourName = @"BonjourName";
 NSString* const GCDWebServerOption_BonjourType = @"BonjourType";
+NSString* const GCDWebServerOption_RequestNATPortMapping = @"RequestNATPortMapping";
+NSString* const GCDWebServerOption_BindToLocalhost = @"BindToLocalhost";
 NSString* const GCDWebServerOption_MaxPendingConnections = @"MaxPendingConnections";
 NSString* const GCDWebServerOption_ServerName = @"ServerName";
 NSString* const GCDWebServerOption_AuthenticationMethod = @"AuthenticationMethod";
@@ -73,9 +78,9 @@ GCDWebServerLoggingLevel GCDWebServerLogLevel = kGCDWebServerLoggingLevel_Info;
 #endif
 #elif defined(__GCDWEBSERVER_LOGGING_FACILITY_COCOALUMBERJACK__)
 #if DEBUG
-int GCDWebServerLogLevel = LOG_LEVEL_DEBUG;
+DDLogLevel GCDWebServerLogLevel = DDLogLevelDebug;
 #else
-int GCDWebServerLogLevel = LOG_LEVEL_INFO;
+DDLogLevel GCDWebServerLogLevel = DDLogLevelInfo;
 #endif
 #endif
 
@@ -170,6 +175,12 @@ static void _ExecuteMainThreadRunLoopSources() {
   dispatch_source_t _source6;
   CFNetServiceRef _registrationService;
   CFNetServiceRef _resolutionService;
+  DNSServiceRef _dnsService;
+  CFSocketRef _dnsSocket;
+  CFRunLoopSourceRef _dnsSource;
+  NSString* _dnsAddress;
+  NSUInteger _dnsPort;
+  BOOL _bindToLocalhost;
 #if TARGET_OS_IPHONE
   BOOL _suspendInBackground;
   UIBackgroundTaskIdentifier _backgroundTask;
@@ -242,7 +253,9 @@ static void _ExecuteMainThreadRunLoopSources() {
   GWS_LOG_DEBUG(@"Did connect");
   
 #if TARGET_OS_IPHONE
-  [self _startBackgroundTask];
+  if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
+    [self _startBackgroundTask];
+  }
 #endif
   
   if ([_delegate respondsToSelector:@selector(webServerDidConnect:)]) {
@@ -283,8 +296,6 @@ static void _ExecuteMainThreadRunLoopSources() {
     [[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
     _backgroundTask = UIBackgroundTaskInvalid;
     GWS_LOG_DEBUG(@"Did end background task");
-  } else {
-    GWS_DNOT_REACHED();
   }
 }
 
@@ -367,7 +378,10 @@ static void _NetServiceRegisterCallBack(CFNetServiceRef service, CFStreamError* 
     } else {
       GCDWebServer* server = (__bridge GCDWebServer*)info;
       GWS_LOG_VERBOSE(@"Bonjour registration complete for %@", [server class]);
-      CFNetServiceResolveWithTimeout(server->_resolutionService, 1.0, NULL);
+      if (!CFNetServiceResolveWithTimeout(server->_resolutionService, kBonjourResolutionTimeout, NULL)) {
+        GWS_LOG_ERROR(@"Failed starting Bonjour resolution");
+        GWS_DNOT_REACHED();
+      }
     }
   }
 }
@@ -381,10 +395,45 @@ static void _NetServiceResolveCallBack(CFNetServiceRef service, CFStreamError* e
       }
     } else {
       GCDWebServer* server = (__bridge GCDWebServer*)info;
-      GWS_LOG_INFO(@"%@ now reachable at %@", [server class], server.bonjourServerURL);
+      GWS_LOG_INFO(@"%@ now locally reachable at %@", [server class], server.bonjourServerURL);
       if ([server.delegate respondsToSelector:@selector(webServerDidCompleteBonjourRegistration:)]) {
         [server.delegate webServerDidCompleteBonjourRegistration:server];
       }
+    }
+  }
+}
+
+static void _DNSServiceCallBack(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex, DNSServiceErrorType errorCode, uint32_t externalAddress, DNSServiceProtocol protocol, uint16_t internalPort, uint16_t externalPort, uint32_t ttl, void* context) {
+  GWS_DCHECK([NSThread isMainThread]);
+  @autoreleasepool {
+    GCDWebServer* server = (__bridge GCDWebServer*)context;
+    if ((errorCode == kDNSServiceErr_NoError) || (errorCode == kDNSServiceErr_DoubleNAT)) {
+      struct sockaddr_in addr4;
+      bzero(&addr4, sizeof(addr4));
+      addr4.sin_len = sizeof(addr4);
+      addr4.sin_family = AF_INET;
+      addr4.sin_addr.s_addr = externalAddress;  // Already in network byte order
+      server->_dnsAddress = GCDWebServerStringFromSockAddr((const struct sockaddr*)&addr4, NO);
+      server->_dnsPort = ntohs(externalPort);
+      GWS_LOG_INFO(@"%@ now publicly reachable at %@", [server class], server.publicServerURL);
+    } else {
+      GWS_LOG_ERROR(@"DNS service error %i", errorCode);
+      server->_dnsAddress = nil;
+      server->_dnsPort = 0;
+    }
+    if ([server.delegate respondsToSelector:@selector(webServerDidUpdateNATPortMapping:)]) {
+      [server.delegate webServerDidUpdateNATPortMapping:server];
+    }
+  }
+}
+
+static void _SocketCallBack(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void* data, void* info) {
+  GWS_DCHECK([NSThread isMainThread]);
+  @autoreleasepool {
+    GCDWebServer* server = (__bridge GCDWebServer*)info;
+    DNSServiceErrorType status = DNSServiceProcessResult(server->_dnsService);
+    if (status != kDNSServiceErr_NoError) {
+      GWS_LOG_ERROR(@"DNS service error %i", status);
     }
   }
 }
@@ -461,18 +510,18 @@ static inline NSString* _EncodeBase64(NSString* string) {
   dispatch_source_set_event_handler(source, ^{
     
     @autoreleasepool {
-      struct sockaddr remoteSockAddr;
+      struct sockaddr_storage remoteSockAddr;
       socklen_t remoteAddrLen = sizeof(remoteSockAddr);
-      int socket = accept(listeningSocket, &remoteSockAddr, &remoteAddrLen);
+      int socket = accept(listeningSocket, (struct sockaddr*)&remoteSockAddr, &remoteAddrLen);
       if (socket > 0) {
         NSData* remoteAddress = [NSData dataWithBytes:&remoteSockAddr length:remoteAddrLen];
         
-        struct sockaddr localSockAddr;
+        struct sockaddr_storage localSockAddr;
         socklen_t localAddrLen = sizeof(localSockAddr);
         NSData* localAddress = nil;
-        if (getsockname(socket, &localSockAddr, &localAddrLen) == 0) {
+        if (getsockname(socket, (struct sockaddr*)&localSockAddr, &localAddrLen) == 0) {
           localAddress = [NSData dataWithBytes:&localSockAddr length:localAddrLen];
-          GWS_DCHECK((!isIPv6 && localSockAddr.sa_family == AF_INET) || (isIPv6 && localSockAddr.sa_family == AF_INET6));
+          GWS_DCHECK((!isIPv6 && localSockAddr.ss_family == AF_INET) || (isIPv6 && localSockAddr.ss_family == AF_INET6));
         } else {
           GWS_DNOT_REACHED();
         }
@@ -495,6 +544,7 @@ static inline NSString* _EncodeBase64(NSString* string) {
   GWS_DCHECK(_source4 == NULL);
   
   NSUInteger port = [_GetOption(_options, GCDWebServerOption_Port, @0) unsignedIntegerValue];
+  BOOL bindToLocalhost = [_GetOption(_options, GCDWebServerOption_BindToLocalhost, @NO) boolValue];
   NSUInteger maxPendingConnections = [_GetOption(_options, GCDWebServerOption_MaxPendingConnections, @16) unsignedIntegerValue];
   
   struct sockaddr_in addr4;
@@ -502,17 +552,16 @@ static inline NSString* _EncodeBase64(NSString* string) {
   addr4.sin_len = sizeof(addr4);
   addr4.sin_family = AF_INET;
   addr4.sin_port = htons(port);
-  addr4.sin_addr.s_addr = htonl(INADDR_ANY);
+  addr4.sin_addr.s_addr = bindToLocalhost ? htonl(INADDR_LOOPBACK) : htonl(INADDR_ANY);
   int listeningSocket4 = [self _createListeningSocket:NO localAddress:&addr4 length:sizeof(addr4) maxPendingConnections:maxPendingConnections error:error];
   if (listeningSocket4 <= 0) {
     return NO;
   }
   if (port == 0) {
-    struct sockaddr addr;
+    struct sockaddr_in addr;
     socklen_t addrlen = sizeof(addr);
-    if (getsockname(listeningSocket4, &addr, &addrlen) == 0) {
-      struct sockaddr_in* sockaddr = (struct sockaddr_in*)&addr;
-      port = ntohs(sockaddr->sin_port);
+    if (getsockname(listeningSocket4, (struct sockaddr*)&addr, &addrlen) == 0) {
+      port = ntohs(addr.sin_port);
     } else {
       GWS_LOG_ERROR(@"Failed retrieving socket address: %s (%i)", strerror(errno), errno);
     }
@@ -523,7 +572,7 @@ static inline NSString* _EncodeBase64(NSString* string) {
   addr6.sin6_len = sizeof(addr6);
   addr6.sin6_family = AF_INET6;
   addr6.sin6_port = htons(port);
-  addr6.sin6_addr = in6addr_any;
+  addr6.sin6_addr = bindToLocalhost ? in6addr_loopback : in6addr_any;
   int listeningSocket6 = [self _createListeningSocket:YES localAddress:&addr6 length:sizeof(addr6) maxPendingConnections:maxPendingConnections error:error];
   if (listeningSocket6 <= 0) {
     close(listeningSocket4);
@@ -554,8 +603,9 @@ static inline NSString* _EncodeBase64(NSString* string) {
   _source4 = [self _createDispatchSourceWithListeningSocket:listeningSocket4 isIPv6:NO];
   _source6 = [self _createDispatchSourceWithListeningSocket:listeningSocket6 isIPv6:YES];
   _port = port;
+  _bindToLocalhost = bindToLocalhost;
   
-  NSString* bonjourName = _GetOption(_options, GCDWebServerOption_BonjourName, @"");
+  NSString* bonjourName = _GetOption(_options, GCDWebServerOption_BonjourName, nil);
   NSString* bonjourType = _GetOption(_options, GCDWebServerOption_BonjourType, @"_http._tcp");
   if (bonjourName) {
     _registrationService = CFNetServiceCreate(kCFAllocatorDefault, CFSTR("local."), (__bridge CFStringRef)bonjourType, (__bridge CFStringRef)(bonjourName.length ? bonjourName : _serverName), (SInt32)_port);
@@ -571,9 +621,34 @@ static inline NSString* _EncodeBase64(NSString* string) {
       if (_resolutionService) {
         CFNetServiceSetClient(_resolutionService, _NetServiceResolveCallBack, &context);
         CFNetServiceScheduleWithRunLoop(_resolutionService, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+      } else {
+        GWS_LOG_ERROR(@"Failed creating CFNetService for resolution");
       }
     } else {
-      GWS_LOG_ERROR(@"Failed creating CFNetService");
+      GWS_LOG_ERROR(@"Failed creating CFNetService for registration");
+    }
+  }
+  
+  if ([_GetOption(_options, GCDWebServerOption_RequestNATPortMapping, @NO) boolValue]) {
+    DNSServiceErrorType status = DNSServiceNATPortMappingCreate(&_dnsService, 0, 0, kDNSServiceProtocol_TCP, htons(port), htons(port), 0, _DNSServiceCallBack, (__bridge void*)self);
+    if (status == kDNSServiceErr_NoError) {
+      CFSocketContext context = {0, (__bridge void*)self, NULL, NULL, NULL};
+      _dnsSocket = CFSocketCreateWithNative(kCFAllocatorDefault, DNSServiceRefSockFD(_dnsService), kCFSocketReadCallBack, _SocketCallBack, &context);
+      if (_dnsSocket) {
+        CFSocketSetSocketFlags(_dnsSocket, CFSocketGetSocketFlags(_dnsSocket) & ~kCFSocketCloseOnInvalidate);
+        _dnsSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, _dnsSocket, 0);
+        if (_dnsSource) {
+          CFRunLoopAddSource(CFRunLoopGetMain(), _dnsSource, kCFRunLoopCommonModes);
+        } else {
+          GWS_LOG_ERROR(@"Failed creating CFRunLoopSource");
+          GWS_DNOT_REACHED();
+        }
+      } else {
+        GWS_LOG_ERROR(@"Failed creating CFSocket");
+        GWS_DNOT_REACHED();
+      }
+    } else {
+      GWS_LOG_ERROR(@"Failed creating NAT port mapping (%i)", status);
     }
   }
   
@@ -591,6 +666,22 @@ static inline NSString* _EncodeBase64(NSString* string) {
 
 - (void)_stop {
   GWS_DCHECK(_source4 != NULL);
+  
+  if (_dnsService) {
+    _dnsAddress = nil;
+    _dnsPort = 0;
+    if (_dnsSource) {
+      CFRunLoopSourceInvalidate(_dnsSource);
+      CFRelease(_dnsSource);
+      _dnsSource = NULL;
+    }
+    if (_dnsSocket) {
+      CFRelease(_dnsSocket);
+      _dnsSocket = NULL;
+    }
+    DNSServiceRefDeallocate(_dnsService);
+    _dnsService = NULL;
+  }
   
   if (_registrationService) {
     if (_resolutionService) {
@@ -619,6 +710,7 @@ static inline NSString* _EncodeBase64(NSString* string) {
 #endif
   _source4 = NULL;
   _port = 0;
+  _bindToLocalhost = NO;
   
   _serverName = nil;
   _authenticationRealm = nil;
@@ -664,7 +756,7 @@ static inline NSString* _EncodeBase64(NSString* string) {
 
 - (BOOL)startWithOptions:(NSDictionary*)options error:(NSError**)error {
   if (_options == nil) {
-    _options = [options copy];
+    _options = options ? [options copy] : @{};
 #if TARGET_OS_IPHONE
     _suspendInBackground = [_GetOption(_options, GCDWebServerOption_AutomaticallySuspendInBackground, @YES) boolValue];
     if (((_suspendInBackground == NO) || ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground)) && ![self _start:error])
@@ -715,7 +807,7 @@ static inline NSString* _EncodeBase64(NSString* string) {
 
 - (NSURL*)serverURL {
   if (_source4) {
-    NSString* ipAddress = GCDWebServerGetPrimaryIPAddress(NO);  // We can't really use IPv6 anyway as it doesn't work great with HTTP URLs in practice
+    NSString* ipAddress = _bindToLocalhost ? @"localhost" : GCDWebServerGetPrimaryIPAddress(NO);  // We can't really use IPv6 anyway as it doesn't work great with HTTP URLs in practice
     if (ipAddress) {
       if (_port != 80) {
         return [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%i/", ipAddress, (int)_port]];
@@ -737,6 +829,17 @@ static inline NSString* _EncodeBase64(NSString* string) {
       } else {
         return [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/", name]];
       }
+    }
+  }
+  return nil;
+}
+
+- (NSURL*)publicServerURL {
+  if (_source4 && _dnsService && _dnsAddress && _dnsPort) {
+    if (_dnsPort != 80) {
+      return [NSURL URLWithString:[NSString stringWithFormat:@"http://%@:%i/", _dnsAddress, (int)_dnsPort]];
+    } else {
+      return [NSURL URLWithString:[NSString stringWithFormat:@"http://%@/", _dnsAddress]];
     }
   }
   return nil;
@@ -854,7 +957,12 @@ static inline NSString* _EncodeBase64(NSString* string) {
       for (NSTextCheckingResult* result in matches) {
         // Start at 1; index 0 is the whole string
         for (NSUInteger i = 1; i < result.numberOfRanges; i++) {
-          [captures addObject:[urlPath substringWithRange:[result rangeAtIndex:i]]];
+          NSRange range = [result rangeAtIndex:i];
+          // range is {NSNotFound, 0} "if one of the capture groups did not participate in this particular match"
+          // see discussion in -[NSRegularExpression firstMatchInString:options:range:]
+          if (range.location != NSNotFound) {
+            [captures addObject:[urlPath substringWithRange:range]];
+          }
         }
       }
 
@@ -910,7 +1018,10 @@ static inline NSString* _EncodeBase64(NSString* string) {
   for (NSString* file in enumerator) {
     if (![file hasPrefix:@"."]) {
       NSString* type = [[enumerator fileAttributes] objectForKey:NSFileType];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       NSString* escapedFile = [file stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+#pragma clang diagnostic pop
       GWS_DCHECK(escapedFile);
       if ([type isEqualToString:NSFileTypeRegular]) {
         [html appendFormat:@"<li><a href=\"%@\">%@</a></li>\n", escapedFile, file];
@@ -984,7 +1095,7 @@ static inline NSString* _EncodeBase64(NSString* string) {
   [XLSharedFacility setMinLogLevel:level];
 #elif defined(__GCDWEBSERVER_LOGGING_FACILITY_COCOALUMBERJACK__)
   GCDWebServerLogLevel = level;
-#else
+#elif defined(__GCDWEBSERVER_LOGGING_FACILITY_BUILTIN__)
   GCDWebServerLogLevel = level;
 #endif
 }
