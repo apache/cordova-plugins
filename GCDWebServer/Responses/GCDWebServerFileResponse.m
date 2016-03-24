@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -142,11 +142,15 @@ static inline NSDate* _NSDateFromTimeSpec(const struct timespec* t) {
 - (BOOL)open:(NSError**)error {
   _file = open([_path fileSystemRepresentation], O_NOFOLLOW | O_RDONLY);
   if (_file <= 0) {
-    *error = GCDWebServerMakePosixError(errno);
+    if (error) {
+      *error = GCDWebServerMakePosixError(errno);
+    }
     return NO;
   }
   if (lseek(_file, _offset, SEEK_SET) != (off_t)_offset) {
-    *error = GCDWebServerMakePosixError(errno);
+    if (error) {
+      *error = GCDWebServerMakePosixError(errno);
+    }
     close(_file);
     return NO;
   }
@@ -158,7 +162,9 @@ static inline NSDate* _NSDateFromTimeSpec(const struct timespec* t) {
   NSMutableData* data = [[NSMutableData alloc] initWithLength:length];
   ssize_t result = read(_file, data.mutableBytes, length);
   if (result < 0) {
-    *error = GCDWebServerMakePosixError(errno);
+    if (error) {
+      *error = GCDWebServerMakePosixError(errno);
+    }
     return nil;
   }
   if (result > 0) {

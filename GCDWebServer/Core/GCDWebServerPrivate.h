@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -49,11 +49,21 @@
 #import "GCDWebServerStreamedResponse.h"
 
 /**
+ *  Check if a custom logging facility should be used instead.
+ */
+
+#if defined(__GCDWEBSERVER_LOGGING_HEADER__)
+
+#define __GCDWEBSERVER_LOGGING_FACILITY_CUSTOM__
+
+#import __GCDWEBSERVER_LOGGING_HEADER__
+
+/**
  *  Automatically detect if XLFacility is available and if so use it as a
  *  logging facility.
  */
 
-#if defined(__has_include) && __has_include("XLFacilityMacros.h")
+#elif defined(__has_include) && __has_include("XLFacilityMacros.h")
 
 #define __GCDWEBSERVER_LOGGING_FACILITY_XLFACILITY__
 
@@ -77,15 +87,15 @@
  *  it as a logging facility.
  */
 
-#elif defined(__has_include) && __has_include("DDLogMacros.h")
+#elif defined(__has_include) && __has_include("CocoaLumberjack/CocoaLumberjack.h")
 
-#import "DDLogMacros.h"
+#import <CocoaLumberjack/CocoaLumberjack.h>
 
 #define __GCDWEBSERVER_LOGGING_FACILITY_COCOALUMBERJACK__
 
 #undef LOG_LEVEL_DEF
 #define LOG_LEVEL_DEF GCDWebServerLogLevel
-extern int GCDWebServerLogLevel;
+extern DDLogLevel GCDWebServerLogLevel;
 
 #define GWS_LOG_DEBUG(...) DDLogDebug(__VA_ARGS__)
 #define GWS_LOG_VERBOSE(...) DDLogVerbose(__VA_ARGS__)
@@ -93,16 +103,6 @@ extern int GCDWebServerLogLevel;
 #define GWS_LOG_WARNING(...) DDLogWarn(__VA_ARGS__)
 #define GWS_LOG_ERROR(...) DDLogError(__VA_ARGS__)
 #define GWS_LOG_EXCEPTION(__EXCEPTION__) DDLogError(@"%@", __EXCEPTION__)
-
-/**
- *  Check if a custom logging facility should be used instead.
- */
-
-#elif defined(__GCDWEBSERVER_LOGGING_HEADER__)
-
-#define __GCDWEBSERVER_LOGGING_FACILITY_CUSTOM__
-
-#import __GCDWEBSERVER_LOGGING_HEADER__
 
 /**
  *  If all of the above fail, then use GCDWebServer built-in
@@ -119,7 +119,7 @@ typedef NS_ENUM(int, GCDWebServerLoggingLevel) {
   kGCDWebServerLoggingLevel_Info,
   kGCDWebServerLoggingLevel_Warning,
   kGCDWebServerLoggingLevel_Error,
-  kGCDWebServerLoggingLevel_Exception,
+  kGCDWebServerLoggingLevel_Exception
 };
 
 extern GCDWebServerLoggingLevel GCDWebServerLogLevel;
@@ -211,6 +211,8 @@ extern NSString* GCDWebServerStringFromSockAddr(const struct sockaddr* addr, BOO
 
 @interface GCDWebServerRequest ()
 @property(nonatomic, readonly) BOOL usesChunkedTransferEncoding;
+@property(nonatomic, readwrite) NSData* localAddressData;
+@property(nonatomic, readwrite) NSData* remoteAddressData;
 - (void)prepareForWriting;
 - (BOOL)performOpen:(NSError**)error;
 - (BOOL)performWriteData:(NSData*)data error:(NSError**)error;

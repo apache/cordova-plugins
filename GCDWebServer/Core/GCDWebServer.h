@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ typedef GCDWebServerRequest* (^GCDWebServerMatchBlock)(NSString* requestMethod, 
  *  recommended to return a GCDWebServerErrorResponse on error so more useful
  *  information can be returned to the client.
  */
-typedef GCDWebServerResponse* (^GCDWebServerProcessBlock)(GCDWebServerRequest* request);
+typedef GCDWebServerResponse* (^GCDWebServerProcessBlock)(__kindof GCDWebServerRequest* request);
 
 /**
  *  The GCDWebServerAsynchronousProcessBlock works like the GCDWebServerProcessBlock
@@ -65,7 +65,7 @@ typedef GCDWebServerResponse* (^GCDWebServerProcessBlock)(GCDWebServerRequest* r
  *  useful information can be returned to the client.
  */
 typedef void (^GCDWebServerCompletionBlock)(GCDWebServerResponse* response);
-typedef void (^GCDWebServerAsyncProcessBlock)(GCDWebServerRequest* request, GCDWebServerCompletionBlock completionBlock);
+typedef void (^GCDWebServerAsyncProcessBlock)(__kindof GCDWebServerRequest* request, GCDWebServerCompletionBlock completionBlock);
 
 /**
  *  The port used by the GCDWebServer (NSNumber / NSUInteger).
@@ -79,7 +79,7 @@ extern NSString* const GCDWebServerOption_Port;
  *  the name will automatically take the value of the GCDWebServerOption_ServerName
  *  option. If this option is set to nil, Bonjour will be disabled.
  *
- *  The default value is an empty string.
+ *  The default value is nil.
  */
 extern NSString* const GCDWebServerOption_BonjourName;
 
@@ -89,6 +89,29 @@ extern NSString* const GCDWebServerOption_BonjourName;
  *  The default value is "_http._tcp", the service type for HTTP web servers.
  */
 extern NSString* const GCDWebServerOption_BonjourType;
+
+/**
+ *  Request a port mapping in the NAT gateway (NSNumber / BOOL).
+ *
+ *  This uses the DNSService API under the hood which supports IPv4 mappings only.
+ *
+ *  The default value is NO.
+ *
+ *  @warning The external port set up by the NAT gateway may be different than
+ *  the one used by the GCDWebServer.
+ */
+extern NSString* const GCDWebServerOption_RequestNATPortMapping;
+
+/**
+ *  Only accept HTTP requests coming from localhost i.e. not from the outside
+ *  network (NSNumber / BOOL).
+ *
+ *  The default value is NO.
+ *
+ *  @warning Bonjour and NAT port mapping should be disabled if using this option
+ *  since the server will not be reachable from the outside network anyway.
+ */
+extern NSString* const GCDWebServerOption_BindToLocalhost;
 
 /**
  *  The maximum number of incoming HTTP requests that can be queued waiting to
@@ -202,8 +225,20 @@ extern NSString* const GCDWebServerAuthenticationMethod_DigestAccess;
 /**
  *  This method is called after the Bonjour registration for the server has
  *  successfully completed.
+ *
+ *  Use the "bonjourServerURL" property to retrieve the Bonjour address of the
+ *  server.
  */
 - (void)webServerDidCompleteBonjourRegistration:(GCDWebServer*)server;
+
+/**
+ *  This method is called after the NAT port mapping for the server has been
+ *  updated.
+ *
+ *  Use the "publicServerURL" property to retrieve the public address of the
+ *  server.
+ */
+- (void)webServerDidUpdateNATPortMapping:(GCDWebServer*)server;
 
 /**
  *  This method is called when the first GCDWebServerConnection is opened by the
@@ -350,6 +385,14 @@ extern NSString* const GCDWebServerAuthenticationMethod_DigestAccess;
  *  has been dynamically changed after the server started running (this should be rare).
  */
 @property(nonatomic, readonly) NSURL* bonjourServerURL;
+
+/**
+ *  Returns the server's public URL.
+ *
+ *  @warning This property is only valid if the server is running and NAT port
+ *  mapping is active.
+ */
+@property(nonatomic, readonly) NSURL* publicServerURL;
 
 /**
  *  Starts the server on port 8080 (OS X & iOS Simulator) or port 80 (iOS)
@@ -512,6 +555,14 @@ extern NSString* const GCDWebServerAuthenticationMethod_DigestAccess;
  *
  *  @warning The interpretation of the "level" argument depends on the logging
  *  facility used at compile time.
+ *
+ *  If using the built-in logging facility, the log levels are as follow:
+ *  DEBUG = 0
+ *  VERBOSE = 1
+ *  INFO = 2
+ *  WARNING = 3
+ *  ERROR = 4
+ *  EXCEPTION = 5
  */
 + (void)setLogLevel:(int)level;
 
