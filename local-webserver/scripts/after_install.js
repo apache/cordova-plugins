@@ -22,9 +22,9 @@
 // This script modifies the project root's config.xml
 // The <content> tag "src" attribute is modified to point to http://localhost:0
 
-var content_src_value = "http://localhost:0";
 var fs = require('fs');
 var path = require('path');
+var URI = require('urijs');
 var old_content_src_value;
 
 module.exports = function(context) {
@@ -37,11 +37,15 @@ module.exports = function(context) {
     var content_tags = etree.findall('./content[@src]');
     if (content_tags.length > 0) {
         old_content_src_value = content_tags[0].get('src');
-        var backup_json = path.join(context.opts.plugin.dir, 'backup.json');
-        var backup_value = { content_src : old_content_src_value };
-        fs.writeFileSync(backup_json, JSON.stringify(backup_value));
+        var content_src = URI.parse(old_content_src_value);
+        if (content_src.hostname !== 'localhost') {
+            var backup_json = path.join(context.opts.plugin.dir, 'backup.json');
+            var backup_value = { content_src : old_content_src_value };
+            fs.writeFileSync(backup_json, JSON.stringify(backup_value));
 
-        content_tags[0].set('src', content_src_value);
+            // XXX: Should we retain the name of the index file here?
+            content_tags[0].set('src', 'http://localhost:0');
+        }
     }
 
     var altcontentsrcTag = etree.findall("./preference[@name='AlternateContentSrc']");
