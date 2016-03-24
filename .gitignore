@@ -1,2 +1,4 @@
 # OS X
 .DS_Store
+# NPM
+*/node_modules

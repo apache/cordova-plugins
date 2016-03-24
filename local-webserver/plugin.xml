@@ -86,7 +86,7 @@
         <framework src="libz.dylib" />
 
         <info>
-        Your content tag in config.xml now points to a http://localhost:0 location (randomized port), e.g. &lt;content src="http://localhost:0" /&gt;
+        If your &lt;content&gt; element did not already point to 'http://localhost[:port]', it will now point to a http://localhost:0 location (randomized port), e.g. &lt;content src="http://localhost:0" /&gt;
         WARNING: For localStorage and IndexedDB persistence, you must choose a non-randomized port (between 1 and 49152, to avoid the ephemeral port range 49152 to 65535 on iOS).
     </info>
 
