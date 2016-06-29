@@ -1,0 +1,15 @@
+{
+  "name": "create-test-files",
+  "version": "1.0.0",
+  "description": "Create Obj-C test files and js test stub for a plugin.",
+  "main": "create-test-files.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "nopt": "^3.0.6",
+    "shelljs": "^0.7.0"
+  }
+}
