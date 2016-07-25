@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2012-2014, Pierre-Olivier Latour
+ Copyright (c) 2012-2015, Pierre-Olivier Latour
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,9 @@
 - (BOOL)open:(NSError**)error {
   int result = deflateInit2(&_stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, 15 + 16, 8, Z_DEFAULT_STRATEGY);
   if (result != Z_OK) {
-    *error = [NSError errorWithDomain:kZlibErrorDomain code:result userInfo:nil];
+    if (error) {
+      *error = [NSError errorWithDomain:kZlibErrorDomain code:result userInfo:nil];
+    }
     return NO;
   }
   if (![super open:error]) {
@@ -130,7 +132,9 @@
         if (result == Z_STREAM_END) {
           _finished = YES;
         } else if (result != Z_OK) {
-          *error = [NSError errorWithDomain:kZlibErrorDomain code:result userInfo:nil];
+          if (error) {
+            *error = [NSError errorWithDomain:kZlibErrorDomain code:result userInfo:nil];
+          }
           return nil;
         }
         length += maxLength - _stream.avail_out;
@@ -238,7 +242,7 @@
 
 - (void)performReadDataWithCompletion:(GCDWebServerBodyReaderCompletionBlock)block {
   if ([_reader respondsToSelector:@selector(asyncReadDataWithCompletion:)]) {
-    [_reader asyncReadDataWithCompletion:block];
+    [_reader asyncReadDataWithCompletion:[block copy]];
   } else {
     NSError* error = nil;
     NSData* data = [_reader readData:&error];
