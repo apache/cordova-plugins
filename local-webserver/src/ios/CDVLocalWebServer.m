@@ -239,7 +239,7 @@
 
             if (hasToken && !hasCookie) {
                 //set cookie
-                [response setValue:authToken forAdditionalHeader:@"Set-Cookie"];
+                [response setValue:[NSString stringWithFormat:@"%@;path=/", authToken] forAdditionalHeader:@"Set-Cookie"];
             }
             complete(response);
         });
