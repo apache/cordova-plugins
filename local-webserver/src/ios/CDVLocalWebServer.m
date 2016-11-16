@@ -52,6 +52,9 @@
     if (startPageUrl != nil) {
         if ([[startPageUrl scheme] isEqualToString:@"http"] && [[startPageUrl host] isEqualToString:@"localhost"]) {
             port = [[startPageUrl port] unsignedIntegerValue];
+            if ([startPageUrl path].length > 1) {
+                indexPage = [[startPageUrl path] substringFromIndex:1];
+            }
             useLocalWebServer = YES;
         }
     }
