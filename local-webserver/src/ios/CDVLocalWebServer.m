@@ -44,6 +44,7 @@
     BOOL requirementsOK = NO;
     NSString* indexPage = @"index.html";
     NSString* appBasePath = @"www";
+    NSString* fragment = @"";
     NSUInteger port = 80;
 
     // check the content tag src
@@ -52,6 +53,12 @@
     if (startPageUrl != nil) {
         if ([[startPageUrl scheme] isEqualToString:@"http"] && [[startPageUrl host] isEqualToString:@"localhost"]) {
             port = [[startPageUrl port] unsignedIntegerValue];
+            if ([startPageUrl path].length > 1) {
+                indexPage = [[startPageUrl path] substringFromIndex:1];
+            }
+            if ([startPageUrl fragment].length > 1) {
+                fragment = [@"#" stringByAppendingString:[startPageUrl fragment]];
+            }
             useLocalWebServer = YES;
         }
     }
@@ -94,7 +101,7 @@
         [self.server startWithPort:port bonjourName:nil];
 
         // Update the startPage (supported in cordova-ios 3.7.0, see https://issues.apache.org/jira/browse/CB-7857)
-		vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken];
+        vc.startPage = [NSString stringWithFormat:@"http://localhost:%lu/%@/%@?%@%@", (unsigned long)self.server.port, appBasePath, indexPage, authToken, fragment];
 
     } else {
         if (requirementsOK) {
