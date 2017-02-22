@@ -24,7 +24,7 @@
 
 var fs = require('fs');
 var path = require('path');
-var URI = require('urijs');
+var URI = require('url');
 var old_content_src_value;
 
 module.exports = function(context) {
