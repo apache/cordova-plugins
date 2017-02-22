@@ -29,5 +29,16 @@
         <header-file src="src/ios/CDVKeyboard.h" />
         <source-file src="src/ios/CDVKeyboard.m" />
     </platform>
+    
+    <!-- android -->
+    <platform name="android">
+        <config-file target="config.xml" parent="/*">
+            <feature name="Keyboard">
+                <param name="android-package" value="org.apache.cordova.labs.keyboard.Keyboard" onload="true" />
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/Keyboard.java" target-dir="src/org/apache/cordova/labs/keyboard" />
+    </platform>
 
 </plugin>
