@@ -17,7 +17,9 @@ Usage
 
 Create Obj-C test files and js test stub for a plugin.
 
-`cordova plugin add https://github.com/apache/cordova-plugins#create-test-files`
+See [branch](https://github.com/apache/cordova-plugins/tree/create-test-files)
+
+`npm install -g https://github.com/apache/cordova-plugins#create-test-files`
 
 ## keyboard
 
