@@ -21,7 +21,7 @@
     <name>CordovaLocalWebServer</name>
     <description>Cordova Local Web Server Plugin</description>
     <keywords>cordova,local web server</keywords>
-    <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugins.git</repo>
+    <repo>https://git-wip-us.apache.org/repos/asf/cordova-plugins.git#local-webserver</repo>
 
     <hook type="after_plugin_install" src="scripts/after_install.js" />
     <hook type="before_plugin_uninstall" src="scripts/before_uninstall.js" />
