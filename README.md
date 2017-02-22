@@ -45,7 +45,7 @@ See [README](https://github.com/apache/cordova-plugins/blob/notification/README.
 
 ## tcpsocket
 
-See [branch](https://github.com/apache/cordova-plugins/tree/tcpsocket)
+See [README](https://github.com/apache/cordova-plugins/blob/tcpsocket/doc/index.md)
 
 `cordova plugin add https://github.com/apache/cordova-plugins#tcpsocket`
 
