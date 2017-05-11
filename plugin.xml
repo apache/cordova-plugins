@@ -3,8 +3,8 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="org.apache.cordova.labs.notification-rebroadcast"
-    version="0.1.0">
+    id="cordova-labs-notification-rebroadcast"
+    version="0.1.1">
     <name>Cordova Notification Rebroadcast Plugin</name>
     <description>rebroadcasts local and remote notifications to other plugins, and as events in JavaScript</description>
     <license>Apache 2.0</license>

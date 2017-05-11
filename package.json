@@ -1,0 +1,15 @@
+{
+  "name": "cordova-labs-notification-rebroadcast",
+  "version": "0.1.1",
+  "description": "Cordova Notification Rebroadcast Plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-wip-us.apache.org/repos/asf/cordova-plugins.git"
+  },
+  "author": "Apache Cordova",
+  "license": "Apache-2.0"
+}
