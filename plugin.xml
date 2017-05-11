@@ -3,8 +3,8 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="org.apache.cordova.labs.keyboard"
-    version="0.1.2">
+    id="cordova-labs-keyboard"
+    version="0.1.3">
     <name>Keyboard</name>
     <description>Cordova Keyboard Plugin</description>
     <license>Apache 2.0</license>
