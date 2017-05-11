@@ -20,8 +20,8 @@
 
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-    id="org.apache.cordova.labs.notification"
-    version="0.0.1">
+    id="cordova-labs-notification"
+    version="0.0.2">
     <name>Notification</name>
     <description>Cordova Notification Plugin</description>
     <license>Apache 2.0</license>

@@ -1,0 +1,18 @@
+{
+  "name": "cordova-labs-notification",
+  "version": "0.0.2",
+  "description": "Cordova Notification Plugin",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-wip-us.apache.org/repos/asf/cordova-plugins.git"
+  },
+  "author": "Apache Cordova",
+  "license": "Apache-2.0"
+}
