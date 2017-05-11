@@ -1,0 +1,15 @@
+{
+  "name": "cordova-labs-wkwebview-engine-localhost",
+  "version": "0.5.0",
+  "description": "Cordova WKWebView Engine with http server (localhost) support",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-wip-us.apache.org/repos/asf/cordova-plugins.git"
+  },
+  "author": "Apache Cordova",
+  "license": "Apache-2.0"
+}
